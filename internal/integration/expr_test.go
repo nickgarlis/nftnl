@@ -1,114 +1,28 @@
 package integration_test
 
 import (
-	"net"
 	"net/netip"
 	"testing"
 
 	"github.com/mdlayher/netlink"
 	"github.com/nickgarlis/nftnl"
+	"github.com/nickgarlis/nftnl/util"
 	"golang.org/x/sys/unix"
 )
 
 func addr4(s string) []byte { b := netip.MustParseAddr(s).As4(); return b[:] }
 
 func TestExpressions(t *testing.T) {
-	iifNameLo := make([]byte, 16)
-	copy(iifNameLo, "lo")
-
-	ctStateMask := (nftnl.CTStateEstablished | nftnl.CTStateRelated).Bytes()
-	ctStateZero := []byte{0, 0, 0, 0}
-
-	setID1 := uint32(1)
-
-	ipv4Daddr127 := netip.MustParseAddr("127.0.0.1").As4()
-	ipv4Saddr10 := netip.MustParsePrefix("10.0.0.0/8").Masked().Addr().As4()
-	ipv6Saddr1 := netip.MustParseAddr("::1").As16()
-	ipv6Saddr2001 := netip.MustParsePrefix("2001:db8::/32").Masked().Addr().As16()
-
 	rules := [][]nftnl.Expr{
-		// iifname "lo" accept
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyIIFName, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: iifNameLo}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
-		// ip protocol tcp tcp dport 80 accept
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyNFProto, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv4}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 9, Len: 1, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{unix.IPPROTO_TCP}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseTransport, Offset: 2, Len: 2, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{0, 80}}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
-		// ct state established,related accept
-		{
-			&nftnl.ExprCt{Key: nftnl.CTKeyState, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprBitwise{
-				SReg: nftnl.Reg1, DReg: nftnl.Reg1, Len: 4,
-				Mask: &nftnl.ExprData{Value: ctStateMask},
-				Xor:  &nftnl.ExprData{Value: ctStateZero},
-			},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpNeq, Data: &nftnl.ExprData{Value: ctStateZero}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
-		// ip saddr @test_set accept
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyNFProto, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv4}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 12, Len: 4, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprLookup{SReg: nftnl.Reg1, Set: "test_set", SetID: &setID1},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
-		// log prefix "drop: " drop
-		{
-			&nftnl.ExprLog{Prefix: "drop: "},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictDrop}}},
-		},
-		// ip daddr 127.0.0.1 drop
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyNFProto, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv4}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 16, Len: 4, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: ipv4Daddr127[:]}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictDrop}}},
-		},
-		// ip saddr 10.0.0.0/8 accept
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyNFProto, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv4}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 12, Len: 4, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprBitwise{
-				SReg: nftnl.Reg1, DReg: nftnl.Reg1, Len: 4,
-				Mask: &nftnl.ExprData{Value: net.CIDRMask(8, 32)},
-				Xor:  &nftnl.ExprData{Value: []byte{0, 0, 0, 0}},
-			},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: ipv4Saddr10[:]}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
-		// ip6 saddr ::1 accept
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyNFProto, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv6}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 8, Len: 16, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: ipv6Saddr1[:]}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
-		// ip6 saddr 2001:db8::/32 accept
-		{
-			&nftnl.ExprMeta{Key: nftnl.MetaKeyNFProto, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv6}}},
-			&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 8, Len: 16, DReg: new(nftnl.Reg1)},
-			&nftnl.ExprBitwise{
-				SReg: nftnl.Reg1, DReg: nftnl.Reg1, Len: 16,
-				Mask: &nftnl.ExprData{Value: net.CIDRMask(32, 128)},
-				Xor:  &nftnl.ExprData{Value: make([]byte, 16)},
-			},
-			&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: ipv6Saddr2001[:]}},
-			&nftnl.ExprImmediate{DReg: nftnl.RegVerdict, Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}}},
-		},
+		util.Exprs(util.IIFName("lo"), util.Accept()),
+		util.Exprs(util.NFProtoIPv4(), util.IPv4Proto(unix.IPPROTO_TCP), util.TCPDport(80), util.Accept()),
+		util.Exprs(util.CTState(nftnl.CTStateEstablished|nftnl.CTStateRelated), util.Accept()),
+		util.Exprs(util.NFProtoIPv4(), util.IPv4SaddrInSet("test_set", 1), util.Accept()),
+		util.Exprs(util.Log("drop: "), util.Drop()),
+		util.Exprs(util.NFProtoIPv4(), util.IPv4Daddr(netip.MustParseAddr("127.0.0.1")), util.Drop()),
+		util.Exprs(util.NFProtoIPv4(), util.IPv4SaddrPrefix(netip.MustParsePrefix("10.0.0.0/8")), util.Accept()),
+		util.Exprs(util.NFProtoIPv6(), util.IPv6Saddr(netip.MustParseAddr("::1")), util.Accept()),
+		util.Exprs(util.NFProtoIPv6(), util.IPv6SaddrPrefix(netip.MustParsePrefix("2001:db8::/32")), util.Accept()),
 	}
 	want := `
 table inet test {
