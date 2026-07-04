@@ -104,6 +104,27 @@ if rule, ok := nftnl.As[*nftnl.Rule](msgs[0].Attrs); ok {
 }
 ```
 
+## Helpers
+
+The `nftnl/util` package provides expression builders for common rule patterns:
+
+```go
+import "github.com/nickgarlis/nftnl/util"
+
+exprs := util.Exprs(
+    util.NFProtoIPv4(),
+    util.IPv4SaddrPrefix(netip.MustParsePrefix("10.0.0.0/8")),
+    util.Accept(),
+)
+
+exprs := util.Exprs(
+    util.CTState(nftnl.CTStateEstablished | nftnl.CTStateRelated),
+    util.Accept(),
+)
+
+exprs := util.Exprs(util.IIFName("eth0"), util.Drop())
+```
+
 ## Design
 
 **One struct per object type.** The kernel uses the same attribute set for
