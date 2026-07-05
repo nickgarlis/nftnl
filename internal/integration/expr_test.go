@@ -15,7 +15,7 @@ func addr4(s string) []byte { b := netip.MustParseAddr(s).As4(); return b[:] }
 func TestExpressions(t *testing.T) {
 	rules := [][]nftnl.Expr{
 		util.Exprs(util.IIFName("lo"), util.Accept()),
-		util.Exprs(util.NFProtoIPv4(), util.IPv4Proto(unix.IPPROTO_TCP), util.TCPDport(80), util.Accept()),
+		util.Exprs(util.NFProtoIPv4(), util.IPv4Proto(unix.IPPROTO_TCP), util.DPort(80), util.Accept()),
 		util.Exprs(util.CTState(nftnl.CTStateEstablished|nftnl.CTStateRelated), util.Accept()),
 		util.Exprs(util.NFProtoIPv4(), util.IPv4SaddrInSet("test_set", 1), util.Accept()),
 		util.Exprs(util.Log("drop: "), util.Drop()),

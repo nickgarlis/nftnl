@@ -73,11 +73,57 @@ func IPv4Proto(proto uint8) []nftnl.Expr {
 	}
 }
 
-// TCPDport matches the TCP destination port (transport-layer offset 2, big-endian).
-func TCPDport(port uint16) []nftnl.Expr {
+// IPv6Proto matches the IPv6 Next Header field (offset 6).
+func IPv6Proto(proto uint8) []nftnl.Expr {
+	return []nftnl.Expr{
+		&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 6, Len: 1, DReg: new(nftnl.Reg1)},
+		&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{proto}}},
+	}
+}
+
+// SPort matches the L4 source port (transport-layer offset 0, big-endian).
+// Works for TCP, UDP, and any protocol that places sport at offset 0.
+func SPort(port uint16) []nftnl.Expr {
+	return []nftnl.Expr{
+		&nftnl.ExprPayload{Base: nftnl.PayloadBaseTransport, Offset: 0, Len: 2, DReg: new(nftnl.Reg1)},
+		&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{byte(port >> 8), byte(port)}}},
+	}
+}
+
+// DPort matches the L4 destination port (transport-layer offset 2, big-endian).
+// Works for TCP, UDP, and any protocol that places dport at offset 2.
+func DPort(port uint16) []nftnl.Expr {
 	return []nftnl.Expr{
 		&nftnl.ExprPayload{Base: nftnl.PayloadBaseTransport, Offset: 2, Len: 2, DReg: new(nftnl.Reg1)},
 		&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: []byte{byte(port >> 8), byte(port)}}},
+	}
+}
+
+// SPortInSet matches the L4 source port against a named set.
+// Pass setID when the set was created in the same batch (transaction-local ID).
+func SPortInSet(name string, setID ...uint32) []nftnl.Expr {
+	lookup := &nftnl.ExprLookup{SReg: nftnl.Reg1, Set: name}
+	if len(setID) > 0 {
+		id := setID[0]
+		lookup.SetID = &id
+	}
+	return []nftnl.Expr{
+		&nftnl.ExprPayload{Base: nftnl.PayloadBaseTransport, Offset: 0, Len: 2, DReg: new(nftnl.Reg1)},
+		lookup,
+	}
+}
+
+// DPortInSet matches the L4 destination port against a named set.
+// Pass setID when the set was created in the same batch (transaction-local ID).
+func DPortInSet(name string, setID ...uint32) []nftnl.Expr {
+	lookup := &nftnl.ExprLookup{SReg: nftnl.Reg1, Set: name}
+	if len(setID) > 0 {
+		id := setID[0]
+		lookup.SetID = &id
+	}
+	return []nftnl.Expr{
+		&nftnl.ExprPayload{Base: nftnl.PayloadBaseTransport, Offset: 2, Len: 2, DReg: new(nftnl.Reg1)},
+		lookup,
 	}
 }
 
