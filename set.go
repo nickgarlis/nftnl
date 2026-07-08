@@ -56,6 +56,19 @@ const (
 	DataTypeCGroupV2
 )
 
+// Name templates for anonymous sets, maps, and object maps. The kernel
+// substitutes %d with the next unused integer, guaranteeing uniqueness within
+// the table. Pass as NFTA_SET_NAME / NFTA_LOOKUP_SET / NFTA_SET_ELEM_LIST_SET.
+//
+// https://git.netfilter.org/nftables/tree/src/evaluate.c?id=3e93d847#n2944
+// https://git.netfilter.org/nftables/tree/src/evaluate.c?id=3e93d847#n2267
+// https://git.netfilter.org/nftables/tree/src/evaluate.c?id=3e93d847#n4948
+const (
+	SetAnonTemplate       = "__set%d"
+	SetMapAnonTemplate    = "__map%d"
+	SetObjMapAnonTemplate = "__objmap%d"
+)
+
 // Set flags for Set.Flags
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L356
 type SetFlags uint32
