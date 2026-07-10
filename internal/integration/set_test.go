@@ -122,11 +122,12 @@ func TestAnonSet(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Set{
-			Table:  "test",
-			Name:   new(nftnl.SetAnonTemplate),
-			Flags:  &flags,
-			KeyLen: new(uint32(2)),
-			ID:     &setID,
+			Table:   "test",
+			Name:    new(nftnl.SetAnonTemplate),
+			Flags:   &flags,
+			KeyType: new(nftnl.DataTypeInetService),
+			KeyLen:  new(uint32(2)),
+			ID:      &setID,
 		},
 	})
 	batch.Add(nftnl.Msg{
