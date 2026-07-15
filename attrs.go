@@ -3,9 +3,14 @@ package nftnl
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
 
 	"github.com/mdlayher/netlink"
+	"golang.org/x/sys/unix"
 )
+
+const nlaHdrLen = unix.NLA_HDRLEN
+const nlaMax = math.MaxUint16 - nlaHdrLen
 
 type Attrs interface {
 	marshal() ([]byte, error)

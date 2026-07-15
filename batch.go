@@ -39,6 +39,21 @@ func (b *Batch) marshal() ([]netlink.Message, error) {
 	result = append(result, batchBegin(b.genID))
 
 	for _, msg := range b.messages {
+		// SetElemList messages may need to be split across multiple netlink
+		// messages when the elements exceed the 16-bit nla_len limit.
+		switch msg.Type {
+		case MsgNewSetElem, MsgDelSetElem, MsgDestroySetElem:
+			if list, ok := msg.Attrs.(*SetElemList); ok {
+				chunks, err := list.marshalChunks()
+				if err != nil {
+					return nil, err
+				}
+				for _, chunk := range chunks {
+					result = append(result, msg.marshalData(chunk))
+				}
+				continue
+			}
+		}
 		nlMsg, err := msg.marshal()
 		if err != nil {
 			return nil, err
