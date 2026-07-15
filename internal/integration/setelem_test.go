@@ -165,3 +165,74 @@ func TestSetElem(t *testing.T) {
 		t.Fatalf("destroy set elements (idempotent): %v", err)
 	}
 }
+
+// TestSetElemLargeList verifies that a SetElemList with more than 4095 IPv4
+// elements is transparently split across multiple netlink messages by the batch
+// marshaler, so all elements reach the kernel without overflow.
+func TestSetElemLargeList(t *testing.T) {
+	conn, _, closer := OpenSystemConn(t)
+	defer closer()
+
+	const n = 5000
+
+	batch := nftnl.NewBatch()
+	batch.Add(nftnl.Msg{
+		Type:   nftnl.MsgNewTable,
+		Family: nftnl.FamilyInet,
+		Flags:  netlink.Request,
+		Attrs:  &nftnl.Table{Name: "test"},
+	})
+	setID := uint32(1)
+	batch.Add(nftnl.Msg{
+		Type:   nftnl.MsgNewSet,
+		Family: nftnl.FamilyInet,
+		Flags:  netlink.Request | netlink.Create,
+		Attrs: &nftnl.Set{
+			ID:      &setID,
+			Table:   "test",
+			Name:    new("bigset"),
+			KeyType: new(nftnl.DataTypeIPAddr),
+			KeyLen:  new(uint32(4)),
+		},
+	})
+
+	elems := make([]nftnl.SetElem, n)
+	for i := range elems {
+		ip := [4]byte{0, byte(i >> 16), byte(i >> 8), byte(i)}
+		elems[i] = nftnl.SetElem{Key: &nftnl.ExprData{Value: ip[:]}}
+	}
+	batch.Add(nftnl.Msg{
+		Type:   nftnl.MsgNewSetElem,
+		Family: nftnl.FamilyInet,
+		Flags:  netlink.Request,
+		Attrs: &nftnl.SetElemList{
+			Table:    "test",
+			Set:      new("bigset"),
+			Elements: elems,
+		},
+	})
+
+	if _, err := conn.SendBatch(batch); err != nil {
+		t.Fatalf("SendBatch: %v", err)
+	}
+
+	msgs, err := conn.Send(nftnl.Msg{
+		Type:   nftnl.MsgGetSetElem,
+		Family: nftnl.FamilyInet,
+		Flags:  netlink.Request | netlink.Dump,
+		Attrs:  &nftnl.SetElemList{Table: "test", Set: new("bigset")},
+	})
+	if err != nil {
+		t.Fatalf("get set elements: %v", err)
+	}
+
+	var got int
+	for _, msg := range msgs {
+		if list, ok := nftnl.As[*nftnl.SetElemList](msg.Attrs); ok {
+			got += len(list.Elements)
+		}
+	}
+	if got != n {
+		t.Errorf("expected %d elements, got %d", n, got)
+	}
+}

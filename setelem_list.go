@@ -20,7 +20,7 @@ type SetElemList struct {
 	SetID    *uint32
 }
 
-func (a *SetElemList) marshal() ([]byte, error) {
+func (a *SetElemList) marshalWithElements(elemBytes []byte) ([]byte, error) {
 	ae := newAttributeEncoder()
 	ae.String(nftaSetElemListTable, a.Table)
 	if a.Set != nil {
@@ -29,22 +29,61 @@ func (a *SetElemList) marshal() ([]byte, error) {
 	if a.SetID != nil {
 		ae.Uint32(nftaSetElemListSetID, *a.SetID)
 	}
-	if len(a.Elements) > 0 {
-		inner := newAttributeEncoder()
-		for _, elem := range a.Elements {
-			b, err := elem.marshal()
-			if err != nil {
-				return nil, err
-			}
-			inner.Bytes(unix.NLA_F_NESTED|nftaListElem, b)
-		}
-		b, err := inner.Encode()
+	if len(elemBytes) > 0 {
+		ae.Bytes(unix.NLA_F_NESTED|nftaSetElemListElements, elemBytes)
+	}
+	return ae.Encode()
+}
+
+func (a *SetElemList) marshalChunks() ([][]byte, error) {
+	var results [][]byte
+	inner := newAttributeEncoder()
+
+	for _, elem := range a.Elements {
+		b, err := elem.marshal()
 		if err != nil {
 			return nil, err
 		}
-		ae.Bytes(unix.NLA_F_NESTED|nftaSetElemListElements, b)
+		if inner.Len() > 0 && inner.Len()+nlaHdrLen+len(b) > nlaMax {
+			elemBytes, err := inner.Encode()
+			if err != nil {
+				return nil, err
+			}
+			chunk, err := a.marshalWithElements(elemBytes)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, chunk)
+			inner = newAttributeEncoder()
+		}
+		inner.Bytes(unix.NLA_F_NESTED|nftaListElem, b)
 	}
-	return ae.Encode()
+
+	elemBytes, err := inner.Encode()
+	if err != nil {
+		return nil, err
+	}
+	chunk, err := a.marshalWithElements(elemBytes)
+	if err != nil {
+		return nil, err
+	}
+	return append(results, chunk), nil
+}
+
+func (a *SetElemList) marshal() ([]byte, error) {
+	inner := newAttributeEncoder()
+	for _, elem := range a.Elements {
+		b, err := elem.marshal()
+		if err != nil {
+			return nil, err
+		}
+		inner.Bytes(unix.NLA_F_NESTED|nftaListElem, b)
+	}
+	elemBytes, err := inner.Encode()
+	if err != nil {
+		return nil, err
+	}
+	return a.marshalWithElements(elemBytes)
 }
 
 func (a *SetElemList) unmarshal(data []byte) error {

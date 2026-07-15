@@ -142,7 +142,7 @@ type Msg struct {
 	Attrs  Attrs
 }
 
-func (m *Msg) marshal() (netlink.Message, error) {
+func (m *Msg) marshalData(attrBytes []byte) netlink.Message {
 	h := header{
 		SubsysID: unix.NFNL_SUBSYS_NFTABLES,
 		MsgType:  uint16(m.Type),
@@ -152,18 +152,20 @@ func (m *Msg) marshal() (netlink.Message, error) {
 		Family:  m.Family,
 		Version: unix.NFNETLINK_V0,
 	}
-
 	nlMsg := netlink.Message{Header: h.marshal()}
-	data := nfg.marshal()
-	if m.Attrs != nil {
-		attrs, err := m.Attrs.marshal()
-		if err != nil {
-			return netlink.Message{}, err
-		}
-		data = append(data, attrs...)
+	nlMsg.Data = append(nfg.marshal(), attrBytes...)
+	return nlMsg
+}
+
+func (m *Msg) marshal() (netlink.Message, error) {
+	if m.Attrs == nil {
+		return m.marshalData(nil), nil
 	}
-	nlMsg.Data = data
-	return nlMsg, nil
+	attrs, err := m.Attrs.marshal()
+	if err != nil {
+		return netlink.Message{}, err
+	}
+	return m.marshalData(attrs), nil
 }
 
 func (m *Msg) unmarshal(msg netlink.Message) error {
