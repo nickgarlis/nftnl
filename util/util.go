@@ -242,3 +242,31 @@ func IPv6SaddrInSet(name string, setID ...uint32) []nftnl.Expr {
 		lookup,
 	}
 }
+
+// IPv4DaddrInSet matches the IPv4 destination address against a named set.
+// Pass setID when the set was created in the same batch (transaction-local ID).
+func IPv4DaddrInSet(name string, setID ...uint32) []nftnl.Expr {
+	lookup := &nftnl.ExprLookup{SReg: nftnl.Reg1, Set: name}
+	if len(setID) > 0 {
+		id := setID[0]
+		lookup.SetID = &id
+	}
+	return []nftnl.Expr{
+		&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 16, Len: 4, DReg: new(nftnl.Reg1)},
+		lookup,
+	}
+}
+
+// IPv6DaddrInSet matches the IPv6 destination address against a named set.
+// Pass setID when the set was created in the same batch (transaction-local ID).
+func IPv6DaddrInSet(name string, setID ...uint32) []nftnl.Expr {
+	lookup := &nftnl.ExprLookup{SReg: nftnl.Reg1, Set: name}
+	if len(setID) > 0 {
+		id := setID[0]
+		lookup.SetID = &id
+	}
+	return []nftnl.Expr{
+		&nftnl.ExprPayload{Base: nftnl.PayloadBaseNetwork, Offset: 24, Len: 16, DReg: new(nftnl.Reg1)},
+		lookup,
+	}
+}
