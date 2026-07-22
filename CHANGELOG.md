@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/nickgarlis/nftnl/compare/v0.2.0...v0.3.0) (2026-07-22)
+
+
+### Features
+
+* add anonymous set name templates ([6d3a173](https://github.com/nickgarlis/nftnl/commit/6d3a17342cdd6ece54d8b4083a12086e036431a3))
+* add IPv6Proto & improve port helpers ([eb272bf](https://github.com/nickgarlis/nftnl/commit/eb272bf56ff231088119bf5b1ac7952c7f6c4414))
+* split large SetElemList across multiple netlink messages ([#12](https://github.com/nickgarlis/nftnl/issues/12)) ([8141fa0](https://github.com/nickgarlis/nftnl/commit/8141fa0ba97d665d269ae6a68d3446c701b212df))
+
+
+### Bug Fixes
+
+* TestAnonSet ([7de716a](https://github.com/nickgarlis/nftnl/commit/7de716a021f5b69971c072acc677e171fbb4f737))
+
 ## [0.2.0](https://github.com/nickgarlis/nftnl/compare/v0.1.0...v0.2.0) (2026-07-04)
 
 
