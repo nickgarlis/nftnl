@@ -10,8 +10,9 @@ import (
 type SetElemFlags uint32
 
 const (
-	SetElemIntervalEnd SetElemFlags = 1 << 0
-	SetElemCatchAll    SetElemFlags = 1 << 1
+	SetElemIntervalEnd  SetElemFlags = 1 << 0
+	SetElemCatchAll     SetElemFlags = 1 << 1
+	SetElemIntervalOpen SetElemFlags = 1 << 2
 )
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L442
