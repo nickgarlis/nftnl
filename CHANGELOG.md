@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0](https://github.com/nickgarlis/nftnl/compare/v0.3.0...v0.4.0) (2026-07-22)
+
+
+### Features
+
+* add IPv4DaddrInSet, IPv6DaddrInSet helpers ([004d7d0](https://github.com/nickgarlis/nftnl/commit/004d7d04e1bc99776ed4ae9873d6b103f70b9427))
+* add OIFName helper ([5329aea](https://github.com/nickgarlis/nftnl/commit/5329aeacf6634b7ab7483265649d1678499342c4))
+* add SetElemIntervalOpen flag ([20cff7c](https://github.com/nickgarlis/nftnl/commit/20cff7c2438c5a1b154c821b30c3d5e8562f7850))
+
 ## [0.3.0](https://github.com/nickgarlis/nftnl/compare/v0.2.0...v0.3.0) (2026-07-22)
 
 
