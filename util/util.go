@@ -47,6 +47,16 @@ func IIFName(name string) []nftnl.Expr {
 	}
 }
 
+// OIFName matches the output interface name (padded to IFNAMSIZ).
+func OIFName(name string) []nftnl.Expr {
+	b := make([]byte, 16)
+	copy(b, name)
+	return []nftnl.Expr{
+		&nftnl.ExprMeta{Key: nftnl.MetaKeyOIFName, DReg: new(nftnl.Reg1)},
+		&nftnl.ExprCmp{SReg: nftnl.Reg1, Op: nftnl.CmpEq, Data: &nftnl.ExprData{Value: b}},
+	}
+}
+
 // NFProtoIPv4 matches packets in an inet table as IPv4.
 // Not needed in ip tables where the family is implicit.
 func NFProtoIPv4() []nftnl.Expr {
