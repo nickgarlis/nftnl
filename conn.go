@@ -24,10 +24,15 @@ type Conn struct {
 }
 
 // recvBufSize returns the userspace buffer size passed to recvmsg.
-// Mirrors NFT_NLMSG_MAXSIZE from the nft CLI: UINT16_MAX + PAGE_SIZE.
-// NLA_LEN is 16 bits so the largest possible netlink message is just over 64 KB.
+// Takes the larger of NFT_NLMSG_MAXSIZE and NFT_MNL_ACK_MAXSIZE from the nft
+// CLI: NFT_NLMSG_MAXSIZE wins on large-page systems (PAGE_SIZE > 8192),
+// NFT_MNL_ACK_MAXSIZE wins otherwise as it is sized to hold a NLMSG_ERROR
+// that echoes back the largest possible request.
 func recvBufSize() int {
-	return math.MaxUint16 + os.Getpagesize()
+	const nfgenmsgSize = 4 // sizeof(struct nfgenmsg)
+	nftNlmsgMaxsize := math.MaxUint16 + os.Getpagesize()
+	nftMnlAckMaxsize := unix.SizeofNlMsghdr + nfgenmsgSize + (1 << 16) + min(os.Getpagesize(), 8192)
+	return max(nftNlmsgMaxsize, nftMnlAckMaxsize)
 }
 
 func Open(config *Config) (*Conn, error) {
