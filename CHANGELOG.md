@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/nickgarlis/nftnl/compare/v0.4.0...v0.5.0) (2026-07-24)
+
+
+### Features
+
+* use max(NFT_NLMSG_MAXSIZE, NFT_MNL_ACK_MAXSIZE) as recvmsg buffer ([37a146d](https://github.com/nickgarlis/nftnl/commit/37a146dff0bc45e240e7f009d6af0c48b2f01d02))
+
 ## [0.4.0](https://github.com/nickgarlis/nftnl/compare/v0.3.0...v0.4.0) (2026-07-22)
 
 
