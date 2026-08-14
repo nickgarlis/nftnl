@@ -166,6 +166,11 @@ func (c *Conn) SendBatch(batch *Batch) ([]Msg, error) {
 	return msgs, enrichBatchErr(err, seqMap)
 }
 
+// PID returns the PID associated with the netlink connection.
+func (c *Conn) PID() uint32 {
+	return c.nlconn.PID()
+}
+
 func (c *Conn) Close() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
