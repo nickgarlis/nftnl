@@ -160,7 +160,7 @@ type Chain struct {
 	Counters *ExprCounter
 	Flags    *ChainFlags
 	ID       *uint32
-	UserData UserData
+	UserData *ChainUserData
 }
 
 func (a *Chain) marshal() ([]byte, error) {
@@ -241,6 +241,7 @@ func (a *Chain) unmarshal(data []byte) error {
 			v := ad.Uint32()
 			a.ID = &v
 		case nftaChainUserdata:
+			a.UserData = &ChainUserData{}
 			if err := a.UserData.unmarshal(ad.Bytes()); err != nil {
 				return err
 			}

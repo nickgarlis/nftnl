@@ -90,7 +90,7 @@ type Rule struct {
 	// Numeric handle of the previous rule
 	Position *uint64
 	// User data binary
-	UserData UserData
+	UserData *RuleUserData
 	// Uniquely identifies a rule in a transaction
 	ID *uint32
 	// Transaction unique identifier of the previous rule
@@ -172,6 +172,7 @@ func (a *Rule) unmarshal(data []byte) error {
 			v := ad.Uint64()
 			a.Position = &v
 		case nftaRuleUserdata:
+			a.UserData = &RuleUserData{}
 			if err := a.UserData.unmarshal(ad.Bytes()); err != nil {
 				return err
 			}

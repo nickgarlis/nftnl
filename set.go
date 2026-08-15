@@ -211,7 +211,7 @@ type Set struct {
 	// Garbage collection interval
 	GCInterval *uint64
 	// User data
-	UserData UserData
+	UserData *SetUserData
 	// Stateful object type
 	ObjType *ObjType
 	// Set handle
@@ -351,6 +351,7 @@ func (a *Set) unmarshal(data []byte) error {
 			v := ad.Uint64()
 			a.GCInterval = &v
 		case nftaSetUserdata:
+			a.UserData = &SetUserData{}
 			if err := a.UserData.unmarshal(ad.Bytes()); err != nil {
 				return err
 			}

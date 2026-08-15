@@ -25,7 +25,8 @@ func TestObj(t *testing.T) {
 		Name:  "mycounter",
 		Data:  &nftnl.ObjCounter{},
 	}
-	obj.UserData.SetString(nftnl.RuleUDComment, "test counter")
+	comment := "test counter"
+	obj.UserData = &nftnl.ObjUserData{Comment: &comment}
 
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewObj,
@@ -60,11 +61,10 @@ func TestObj(t *testing.T) {
 		t.Errorf("expected *ObjCounter, got %T", attrs.Data)
 	}
 
-	gotComment, ok := attrs.UserData.GetString(nftnl.RuleUDComment)
-	if !ok {
+	if attrs.UserData.Comment == nil {
 		t.Fatal("obj has no comment in userdata")
 	}
-	if diff := cmp.Diff("test counter", gotComment); diff != "" {
+	if diff := cmp.Diff("test counter", *attrs.UserData.Comment); diff != "" {
 		t.Errorf("obj comment mismatch (-want +got):\n%s", diff)
 	}
 

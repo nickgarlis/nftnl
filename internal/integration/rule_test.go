@@ -74,7 +74,8 @@ func TestRule(t *testing.T) {
 			},
 		},
 	}
-	rule.UserData.SetString(nftnl.RuleUDComment, "http accept")
+	comment := "http accept"
+	rule.UserData = &nftnl.RuleUserData{Comment: &comment}
 
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewRule,
@@ -103,11 +104,10 @@ func TestRule(t *testing.T) {
 		t.Fatalf("expected *RuleAttrs, got %T", msgs[0].Attrs)
 	}
 
-	gotComment, ok := attrs.UserData.GetString(nftnl.RuleUDComment)
-	if !ok {
+	if attrs.UserData.Comment == nil {
 		t.Fatal("rule has no comment in userdata")
 	}
-	if diff := cmp.Diff("http accept", gotComment); diff != "" {
+	if diff := cmp.Diff("http accept", *attrs.UserData.Comment); diff != "" {
 		t.Errorf("rule comment mismatch (-want +got):\n%s", diff)
 	}
 

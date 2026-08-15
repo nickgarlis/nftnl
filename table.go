@@ -40,7 +40,7 @@ type Table struct {
 	Use    *uint32
 	Handle *uint64
 	// Userdata binary
-	UserData UserData
+	UserData *TableUserData
 	// Owner of this table through netlink portID
 	Owner *uint32
 }
@@ -85,6 +85,7 @@ func (a *Table) unmarshal(data []byte) error {
 			v := ad.Uint64()
 			a.Handle = &v
 		case nftaTableUserdata:
+			a.UserData = &TableUserData{}
 			if err := a.UserData.unmarshal(ad.Bytes()); err != nil {
 				return err
 			}

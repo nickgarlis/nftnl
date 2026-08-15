@@ -44,7 +44,7 @@ type SetElem struct {
 	// Expiration time
 	Expiration *uint64
 	// User data
-	UserData UserData
+	UserData *SetElemUserData
 	// Expression
 	Expr Expr
 	// Stateful object reference
@@ -145,6 +145,7 @@ func (a *SetElem) unmarshal(data []byte) error {
 			v := ad.Uint64()
 			a.Expiration = &v
 		case nftaSetElemUserdata:
+			a.UserData = &SetElemUserData{}
 			if err := a.UserData.unmarshal(ad.Bytes()); err != nil {
 				return err
 			}

@@ -49,7 +49,7 @@ type Obj struct {
 	Data     ObjData
 	Use      uint32
 	Handle   *uint64
-	UserData UserData
+	UserData *ObjUserData
 }
 
 func (a *Obj) marshal() ([]byte, error) {
@@ -98,6 +98,7 @@ func (a *Obj) unmarshal(data []byte) error {
 			v := ad.Uint64()
 			a.Handle = &v
 		case nftaObjUserdata:
+			a.UserData = &ObjUserData{}
 			if err := a.UserData.unmarshal(ad.Bytes()); err != nil {
 				return err
 			}
