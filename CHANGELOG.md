@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0](https://github.com/nickgarlis/nftnl/compare/v0.4.0...v0.5.0) (2026-08-16)
+
+
+### Features
+
+* add Conn.PID() method ([4d86bb8](https://github.com/nickgarlis/nftnl/commit/4d86bb8a970e6b13aa4e2395c6e9ddf13a804a63))
+* make every attribute field nullable ([aa3891f](https://github.com/nickgarlis/nftnl/commit/aa3891f90d18d7ae609ee4aa40ea518f0b6057e7))
+* replace userdata map with typed structs ([c436c28](https://github.com/nickgarlis/nftnl/commit/c436c2895335218d0c34fa6c8740d5e7707f3e2d))
+* use max(NFT_NLMSG_MAXSIZE, NFT_MNL_ACK_MAXSIZE) as recvmsg buffer ([37a146d](https://github.com/nickgarlis/nftnl/commit/37a146dff0bc45e240e7f009d6af0c48b2f01d02))
+
 ## [0.4.0](https://github.com/nickgarlis/nftnl/compare/v0.3.0...v0.4.0) (2026-07-22)
 
 
