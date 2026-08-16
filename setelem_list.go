@@ -14,7 +14,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L473
 type SetElemList struct {
-	Table    string
+	Table    *string
 	Set      *string
 	Elements []SetElem
 	SetID    *uint32
@@ -22,7 +22,9 @@ type SetElemList struct {
 
 func (a *SetElemList) marshalWithElements(elemBytes []byte) ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaSetElemListTable, a.Table)
+	if a.Table != nil {
+		ae.String(nftaSetElemListTable, *a.Table)
+	}
 	if a.Set != nil {
 		ae.String(nftaSetElemListSet, *a.Set)
 	}
@@ -94,7 +96,7 @@ func (a *SetElemList) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaSetElemListTable:
-			a.Table = ad.String()
+			a.Table = new(ad.String())
 		case nftaSetElemListSet:
 			v := ad.String()
 			a.Set = &v

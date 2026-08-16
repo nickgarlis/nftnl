@@ -54,16 +54,20 @@ const (
 //
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L165
 type Hook struct {
-	HookNum  HookNum
-	Priority Priority
+	HookNum  *HookNum
+	Priority *Priority
 	Dev      *string
 	Devs     []string
 }
 
 func (a *Hook) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaHookHooknum, uint32(a.HookNum))
-	ae.Uint32(nftaHookPriority, uint32(a.Priority))
+	if a.HookNum != nil {
+		ae.Uint32(nftaHookHooknum, uint32(*a.HookNum))
+	}
+	if a.Priority != nil {
+		ae.Uint32(nftaHookPriority, uint32(*a.Priority))
+	}
 	if len(a.Devs) > 0 {
 		inner := newAttributeEncoder()
 		for _, dev := range a.Devs {
@@ -88,9 +92,9 @@ func (a *Hook) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaHookHooknum:
-			a.HookNum = HookNum(ad.Uint32())
+			a.HookNum = new(HookNum(ad.Uint32()))
 		case nftaHookPriority:
-			a.Priority = int32(ad.Uint32())
+			a.Priority = new(Priority(ad.Uint32()))
 		case nftaHookDev:
 			v := ad.String()
 			a.Dev = &v
@@ -150,13 +154,13 @@ const (
 //
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L230
 type Chain struct {
-	Table    string
-	Name     string
+	Table    *string
+	Name     *string
 	Handle   *uint64
 	Hook     *Hook
 	Policy   *ChainPolicy
 	Use      *uint32
-	Type     string
+	Type     *string
 	Counters *ExprCounter
 	Flags    *ChainFlags
 	ID       *uint32
@@ -165,8 +169,12 @@ type Chain struct {
 
 func (a *Chain) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaChainTable, a.Table)
-	ae.String(nftaChainName, a.Name)
+	if a.Table != nil {
+		ae.String(nftaChainTable, *a.Table)
+	}
+	if a.Name != nil {
+		ae.String(nftaChainName, *a.Name)
+	}
 	if a.Handle != nil {
 		ae.Uint64(nftaChainHandle, *a.Handle)
 	}
@@ -180,8 +188,8 @@ func (a *Chain) marshal() ([]byte, error) {
 	if a.Policy != nil {
 		ae.Uint32(nftaChainPolicy, uint32(*a.Policy))
 	}
-	if a.Type != "" {
-		ae.String(nftaChainType, a.Type)
+	if a.Type != nil {
+		ae.String(nftaChainType, *a.Type)
 	}
 	if a.Counters != nil {
 		b, err := a.Counters.marshal()
@@ -210,9 +218,9 @@ func (a *Chain) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaChainTable:
-			a.Table = ad.String()
+			a.Table = new(ad.String())
 		case nftaChainName:
-			a.Name = ad.String()
+			a.Name = new(ad.String())
 		case nftaChainHandle:
 			v := ad.Uint64()
 			a.Handle = &v
@@ -228,7 +236,7 @@ func (a *Chain) unmarshal(data []byte) error {
 			v := ad.Uint32()
 			a.Use = &v
 		case nftaChainType:
-			a.Type = ad.String()
+			a.Type = new(ad.String())
 		case nftaChainCounters:
 			a.Counters = &ExprCounter{}
 			if err := a.Counters.unmarshal(ad.Bytes()); err != nil {

@@ -187,7 +187,7 @@ func (a *SetDesc) unmarshal(data []byte) error {
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L382
 type Set struct {
 	// Table name
-	Table string
+	Table *string
 	// Set name
 	Name *string
 	// Bitmask of set flags
@@ -228,7 +228,9 @@ type Set struct {
 
 func (a *Set) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaSetTable, a.Table)
+	if a.Table != nil {
+		ae.String(nftaSetTable, *a.Table)
+	}
 	if a.Name != nil {
 		ae.String(nftaSetName, *a.Name)
 	}
@@ -314,7 +316,7 @@ func (a *Set) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaSetTable:
-			a.Table = ad.String()
+			a.Table = new(ad.String())
 		case nftaSetName:
 			v := ad.String()
 			a.Name = &v

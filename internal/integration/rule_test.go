@@ -18,59 +18,59 @@ func TestRule(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "test",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("test"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
 
 	rule := nftnl.Rule{
-		Table: "test",
+		Table: new("test"),
 		Chain: new("input"),
 		Expressions: []nftnl.Expr{
 			&nftnl.ExprMeta{
-				Key:  nftnl.MetaKeyNFProto,
+				Key:  new(nftnl.MetaKeyNFProto),
 				DReg: new(nftnl.Reg1),
 			},
 			&nftnl.ExprCmp{
-				SReg: nftnl.Reg1,
-				Op:   nftnl.CmpEq,
+				SReg: new(nftnl.Reg1),
+				Op:   new(nftnl.CmpEq),
 				Data: &nftnl.ExprData{Value: []byte{nftnl.FamilyIPv4}},
 			},
 			&nftnl.ExprPayload{
-				Base:   nftnl.PayloadBaseNetwork,
-				Offset: 9,
-				Len:    1,
+				Base:   new(nftnl.PayloadBaseNetwork),
+				Offset: new(uint32(9)),
+				Len:    new(uint32(1)),
 				DReg:   new(nftnl.Reg1),
 			},
 			&nftnl.ExprCmp{
-				SReg: nftnl.Reg1,
-				Op:   nftnl.CmpEq,
+				SReg: new(nftnl.Reg1),
+				Op:   new(nftnl.CmpEq),
 				Data: &nftnl.ExprData{Value: []byte{unix.IPPROTO_TCP}},
 			},
 			&nftnl.ExprPayload{
-				Base:   nftnl.PayloadBaseTransport,
-				Offset: 2,
-				Len:    2,
+				Base:   new(nftnl.PayloadBaseTransport),
+				Offset: new(uint32(2)),
+				Len:    new(uint32(2)),
 				DReg:   new(nftnl.Reg1),
 			},
 			&nftnl.ExprCmp{
-				SReg: nftnl.Reg1,
-				Op:   nftnl.CmpEq,
+				SReg: new(nftnl.Reg1),
+				Op:   new(nftnl.CmpEq),
 				Data: &nftnl.ExprData{Value: []byte{0x00, 0x50}}, // port 80, big-endian
 			},
 			&nftnl.ExprImmediate{
-				DReg: nftnl.RegVerdict,
-				Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}},
+				DReg: new(nftnl.RegVerdict),
+				Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: new(nftnl.VerdictAccept)}},
 			},
 		},
 	}
@@ -91,7 +91,7 @@ func TestRule(t *testing.T) {
 		Type:   nftnl.MsgGetRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("get rules: %v", err)
@@ -123,7 +123,7 @@ table inet test {
 		Type:   nftnl.MsgGetRuleReset,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("get rule reset: %v", err)
@@ -144,7 +144,7 @@ table inet test {
 		Type:   nftnl.MsgDelRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input"), Handle: attrs.Handle},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input"), Handle: attrs.Handle},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete rule: %v", err)
@@ -153,7 +153,7 @@ table inet test {
 		Type:   nftnl.MsgGetRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("get rules after delete: %v", err)
@@ -167,7 +167,7 @@ table inet test {
 		Type:   nftnl.MsgDestroyRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input"), Handle: attrs.Handle},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input"), Handle: attrs.Handle},
 	})
 	if _, err := conn.SendBatch(destroy); err != nil {
 		t.Fatalf("destroy rule (idempotent): %v", err)

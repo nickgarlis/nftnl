@@ -18,7 +18,7 @@ func TestSet(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewSet,
@@ -26,7 +26,7 @@ func TestSet(t *testing.T) {
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Set{
 			ID:      new(uint32(1)),
-			Table:   "test",
+			Table:   new("test"),
 			Name:    new("testset"),
 			KeyType: new(nftnl.DataTypeIPAddr),
 			KeyLen:  new(uint32(4)),
@@ -40,7 +40,7 @@ func TestSet(t *testing.T) {
 		Type:   nftnl.MsgGetSet,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Set{Table: "test"},
+		Attrs:  &nftnl.Set{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get sets: %v", err)
@@ -61,7 +61,7 @@ func TestSet(t *testing.T) {
 		Type:   nftnl.MsgDelSet,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Set{Table: "test", Name: new("testset")},
+		Attrs:  &nftnl.Set{Table: new("test"), Name: new("testset")},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete set: %v", err)
@@ -70,7 +70,7 @@ func TestSet(t *testing.T) {
 		Type:   nftnl.MsgGetSet,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Set{Table: "test"},
+		Attrs:  &nftnl.Set{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get sets after delete: %v", err)
@@ -84,7 +84,7 @@ func TestSet(t *testing.T) {
 		Type:   nftnl.MsgDestroySet,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Set{Table: "test", Name: new("testset")},
+		Attrs:  &nftnl.Set{Table: new("test"), Name: new("testset")},
 	})
 	if _, err := conn.SendBatch(destroy); err != nil {
 		t.Fatalf("destroy set (idempotent): %v", err)
@@ -103,17 +103,17 @@ func TestAnonSet(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "test",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("test"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
@@ -122,7 +122,7 @@ func TestAnonSet(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Set{
-			Table:   "test",
+			Table:   new("test"),
 			Name:    new(nftnl.SetAnonTemplate),
 			Flags:   &flags,
 			KeyType: new(nftnl.DataTypeInetService),
@@ -135,7 +135,7 @@ func TestAnonSet(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.SetElemList{
-			Table: "test",
+			Table: new("test"),
 			Set:   new(nftnl.SetAnonTemplate),
 			SetID: &setID,
 			Elements: []nftnl.SetElem{
@@ -149,23 +149,23 @@ func TestAnonSet(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Rule{
-			Table: "test",
+			Table: new("test"),
 			Chain: new("input"),
 			Expressions: []nftnl.Expr{
 				&nftnl.ExprPayload{
-					Base:   nftnl.PayloadBaseTransport,
-					Offset: 2,
-					Len:    2,
+					Base:   new(nftnl.PayloadBaseTransport),
+					Offset: new(uint32(2)),
+					Len:    new(uint32(2)),
 					DReg:   new(nftnl.Reg1),
 				},
 				&nftnl.ExprLookup{
-					SReg:  nftnl.Reg1,
-					Set:   nftnl.SetAnonTemplate,
+					SReg:  new(nftnl.Reg1),
+					Set:   new(nftnl.SetAnonTemplate),
 					SetID: &setID,
 				},
 				&nftnl.ExprImmediate{
-					DReg: nftnl.RegVerdict,
-					Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}},
+					DReg: new(nftnl.RegVerdict),
+					Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: new(nftnl.VerdictAccept)}},
 				},
 			},
 		},
@@ -179,7 +179,7 @@ func TestAnonSet(t *testing.T) {
 		Type:   nftnl.MsgGetRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("get rules: %v", err)
@@ -203,11 +203,11 @@ func TestAnonSet(t *testing.T) {
 	if lookup == nil {
 		t.Fatal("rule has no lookup expression")
 	}
-	if lookup.Set == nftnl.SetAnonTemplate {
+	if *lookup.Set == nftnl.SetAnonTemplate {
 		t.Errorf("lookup Set still holds template %q; kernel should have resolved it to a real name", nftnl.SetAnonTemplate)
 	}
-	if !strings.HasPrefix(lookup.Set, "__set") {
-		t.Errorf("lookup Set %q does not have expected __set prefix", lookup.Set)
+	if !strings.HasPrefix(*lookup.Set, "__set") {
+		t.Errorf("lookup Set %q does not have expected __set prefix", *lookup.Set)
 	}
 
 	// The anonymous set must be visible while the rule holds a reference.
@@ -215,7 +215,7 @@ func TestAnonSet(t *testing.T) {
 		Type:   nftnl.MsgGetSet,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Set{Table: "test"},
+		Attrs:  &nftnl.Set{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get sets: %v", err)
@@ -245,7 +245,7 @@ table inet test {
 		Type:   nftnl.MsgDelRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input"), Handle: ruleAttrs.Handle},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input"), Handle: ruleAttrs.Handle},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete rule: %v", err)
@@ -255,7 +255,7 @@ table inet test {
 		Type:   nftnl.MsgGetSet,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Set{Table: "test"},
+		Attrs:  &nftnl.Set{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get sets after rule delete: %v", err)

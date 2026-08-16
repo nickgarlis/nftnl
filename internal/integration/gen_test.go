@@ -35,7 +35,7 @@ func TestGen(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	if _, err := conn.SendBatch(batch); err != nil {
 		t.Fatalf("create table: %v", err)
@@ -63,7 +63,7 @@ func TestGen(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test2"},
+		Attrs:  &nftnl.Table{Name: new("test2")},
 	})
 	if _, err := conn.SendBatch(stale); !errors.Is(err, unix.ERESTART) {
 		t.Errorf("expected ERESTART with stale gen ID, got %v", err)
@@ -75,7 +75,7 @@ func TestGen(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test2"},
+		Attrs:  &nftnl.Table{Name: new("test2")},
 	})
 	if _, err := conn.SendBatch(current); err != nil {
 		t.Fatalf("batch with current gen ID: %v", err)

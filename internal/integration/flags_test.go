@@ -18,7 +18,7 @@ func TestFlags(t *testing.T) {
 			Type:   nftnl.MsgNewTable,
 			Family: nftnl.FamilyInet,
 			Flags:  netlink.Request | netlink.Create | netlink.Echo,
-			Attrs:  &nftnl.Table{Name: "test"},
+			Attrs:  &nftnl.Table{Name: new("test")},
 		})
 		msgs, err := conn.SendBatch(batch)
 		if err != nil {
@@ -32,7 +32,7 @@ func TestFlags(t *testing.T) {
 		if !ok {
 			t.Fatalf("msgs[0]: expected *TableAttrs, got %T", msgs[0].Attrs)
 		}
-		if diff := cmp.Diff("test", attrs.Name); diff != "" {
+		if diff := cmp.Diff("test", *attrs.Name); diff != "" {
 			t.Errorf("echoed table name mismatch (-want +got):\n%s", diff)
 		}
 		if attrs.Handle == nil {
@@ -52,7 +52,7 @@ func TestFlags(t *testing.T) {
 			Type:   nftnl.MsgNewTable,
 			Family: nftnl.FamilyInet,
 			Flags:  netlink.Request | netlink.Create | netlink.Acknowledge,
-			Attrs:  &nftnl.Table{Name: "test"},
+			Attrs:  &nftnl.Table{Name: new("test")},
 		})
 		if _, err := conn.SendBatch(setup); err != nil {
 			t.Fatalf("create table: %v", err)
@@ -75,7 +75,7 @@ func TestFlags(t *testing.T) {
 		if !ok {
 			t.Fatalf("expected *TableAttrs, got %T", msgs[0].Attrs)
 		}
-		if diff := cmp.Diff("test", attrs.Name); diff != "" {
+		if diff := cmp.Diff("test", *attrs.Name); diff != "" {
 			t.Errorf("table name mismatch (-want +got):\n%s", diff)
 		}
 	})
@@ -89,7 +89,7 @@ func TestFlags(t *testing.T) {
 			Type:   nftnl.MsgNewTable,
 			Family: nftnl.FamilyInet,
 			Flags:  netlink.Request | netlink.Create | netlink.Echo | netlink.Acknowledge,
-			Attrs:  &nftnl.Table{Name: "test"},
+			Attrs:  &nftnl.Table{Name: new("test")},
 		})
 		msgs, err := conn.SendBatch(batch)
 		if err != nil {

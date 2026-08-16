@@ -78,7 +78,7 @@ func (a *RuleCompat) unmarshal(data []byte) error {
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L263
 type Rule struct {
 	// Name of the table containing the rule
-	Table string
+	Table *string
 	// Name of the chain containing the rule
 	Chain *string
 	// Numeric handle of the rule
@@ -101,7 +101,9 @@ type Rule struct {
 
 func (a *Rule) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaRuleTable, a.Table)
+	if a.Table != nil {
+		ae.String(nftaRuleTable, *a.Table)
+	}
 	if a.Chain != nil {
 		ae.String(nftaRuleChain, *a.Chain)
 	}
@@ -156,7 +158,7 @@ func (a *Rule) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaRuleTable:
-			a.Table = ad.String()
+			a.Table = new(ad.String())
 		case nftaRuleChain:
 			v := ad.String()
 			a.Chain = &v

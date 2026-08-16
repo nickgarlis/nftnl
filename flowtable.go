@@ -91,8 +91,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1715
 type Flowtable struct {
-	Table  string
-	Name   string
+	Table  *string
+	Name   *string
 	Hook   *FlowtableHook
 	Use    *uint32
 	Handle *uint64
@@ -101,8 +101,12 @@ type Flowtable struct {
 
 func (a *Flowtable) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaFlowtableTable, a.Table)
-	ae.String(nftaFlowtableName, a.Name)
+	if a.Table != nil {
+		ae.String(nftaFlowtableTable, *a.Table)
+	}
+	if a.Name != nil {
+		ae.String(nftaFlowtableName, *a.Name)
+	}
 	if a.Hook != nil {
 		b, err := a.Hook.marshal()
 		if err != nil {
@@ -130,9 +134,9 @@ func (a *Flowtable) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaFlowtableTable:
-			a.Table = ad.String()
+			a.Table = new(ad.String())
 		case nftaFlowtableName:
-			a.Name = ad.String()
+			a.Name = new(ad.String())
 		case nftaFlowtableHook:
 			a.Hook = &FlowtableHook{}
 			if err := a.Hook.unmarshal(ad.Bytes()); err != nil {

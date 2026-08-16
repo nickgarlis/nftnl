@@ -19,7 +19,7 @@ func TestSetElem(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewSet,
@@ -27,7 +27,7 @@ func TestSetElem(t *testing.T) {
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Set{
 			ID:      new(uint32(1)),
-			Table:   "test",
+			Table:   new("test"),
 			Name:    new("testset"),
 			KeyType: new(nftnl.DataTypeIPAddr),
 			KeyLen:  new(uint32(4)),
@@ -50,7 +50,7 @@ func TestSetElem(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
 		Attrs: &nftnl.SetElemList{
-			Table:    "test",
+			Table:    new("test"),
 			Set:      new("testset"),
 			Elements: elems,
 		},
@@ -63,7 +63,7 @@ func TestSetElem(t *testing.T) {
 		Type:   nftnl.MsgGetSetElem,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.SetElemList{Table: "test", Set: new("testset")},
+		Attrs:  &nftnl.SetElemList{Table: new("test"), Set: new("testset")},
 	})
 	if err != nil {
 		t.Fatalf("get set elements: %v", err)
@@ -93,7 +93,7 @@ func TestSetElem(t *testing.T) {
 		Type:   nftnl.MsgGetSetElemReset,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.SetElemList{Table: "test", Set: new("testset")},
+		Attrs:  &nftnl.SetElemList{Table: new("test"), Set: new("testset")},
 	})
 	if err != nil {
 		t.Fatalf("get set elem reset: %v", err)
@@ -123,7 +123,7 @@ func TestSetElem(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
 		Attrs: &nftnl.SetElemList{
-			Table:    "test",
+			Table:    new("test"),
 			Set:      new("testset"),
 			Elements: elems,
 		},
@@ -135,7 +135,7 @@ func TestSetElem(t *testing.T) {
 		Type:   nftnl.MsgGetSetElem,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.SetElemList{Table: "test", Set: new("testset")},
+		Attrs:  &nftnl.SetElemList{Table: new("test"), Set: new("testset")},
 	})
 	if err != nil {
 		t.Fatalf("get elements after delete: %v", err)
@@ -156,7 +156,7 @@ func TestSetElem(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
 		Attrs: &nftnl.SetElemList{
-			Table:    "test",
+			Table:    new("test"),
 			Set:      new("testset"),
 			Elements: elems,
 		},
@@ -180,7 +180,7 @@ func TestSetElemLargeList(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	setID := uint32(1)
 	batch.Add(nftnl.Msg{
@@ -189,7 +189,7 @@ func TestSetElemLargeList(t *testing.T) {
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Set{
 			ID:      &setID,
-			Table:   "test",
+			Table:   new("test"),
 			Name:    new("bigset"),
 			KeyType: new(nftnl.DataTypeIPAddr),
 			KeyLen:  new(uint32(4)),
@@ -206,7 +206,7 @@ func TestSetElemLargeList(t *testing.T) {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
 		Attrs: &nftnl.SetElemList{
-			Table:    "test",
+			Table:    new("test"),
 			Set:      new("bigset"),
 			Elements: elems,
 		},
@@ -220,7 +220,7 @@ func TestSetElemLargeList(t *testing.T) {
 		Type:   nftnl.MsgGetSetElem,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.SetElemList{Table: "test", Set: new("bigset")},
+		Attrs:  &nftnl.SetElemList{Table: new("test"), Set: new("bigset")},
 	})
 	if err != nil {
 		t.Fatalf("get set elements: %v", err)

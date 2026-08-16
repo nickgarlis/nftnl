@@ -53,7 +53,7 @@ table inet test {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewSet,
@@ -61,7 +61,7 @@ table inet test {
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Set{
 			ID:      new(uint32(1)),
-			Table:   "test",
+			Table:   new("test"),
 			Name:    new("test_set"),
 			KeyType: new(nftnl.DataTypeIPAddr),
 			KeyLen:  new(uint32(4)),
@@ -73,7 +73,7 @@ table inet test {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.SetElemList{
-			Table: "test",
+			Table: new("test"),
 			Set:   new("test_set"),
 			SetID: new(uint32(1)),
 			Elements: []nftnl.SetElem{
@@ -91,10 +91,10 @@ table inet test {
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "test",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("test"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
@@ -105,7 +105,7 @@ table inet test {
 			Family: nftnl.FamilyInet,
 			Flags:  netlink.Request | netlink.Create | netlink.Append,
 			Attrs: &nftnl.Rule{
-				Table:       "test",
+				Table:       new("test"),
 				Chain:       new("input"),
 				Expressions: exprs,
 			},
@@ -120,7 +120,7 @@ table inet test {
 		Type:   nftnl.MsgGetRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("get rules: %v", err)

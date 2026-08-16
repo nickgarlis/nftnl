@@ -42,17 +42,17 @@ func main() {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
-		Attrs:  &nftnl.Table{Name: "mytable"},
+		Attrs:  &nftnl.Table{Name: new("mytable")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "mytable",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("mytable"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
@@ -71,7 +71,7 @@ func main() {
 	}
 	for _, msg := range msgs {
 		if t, ok := nftnl.As[*nftnl.Table](msg.Attrs); ok {
-			fmt.Println(t.Name)
+			fmt.Println(*t.Name)
 		}
 	}
 }
@@ -89,7 +89,7 @@ msgs, err := conn.Send(nftnl.Msg{
 	Family: nftnl.FamilyInet,
 	Flags:  netlink.Request | netlink.Create | netlink.Append | netlink.Echo,
 	Attrs: &nftnl.Rule{
-		Table:       "mytable",
+		Table:       new("mytable"),
 		Chain:       new("input"),
 		Expressions: []nftnl.Expr{ /* ... */ },
 	},
@@ -131,9 +131,9 @@ exprs := util.Exprs(util.IIFName("eth0"), util.Drop())
 new/get/delete operations on any given object. `Chain`, `Rule`, `Set`, etc.
 work for creating, querying, and deleting alike.
 
-**Pointer fields mean optional.** A `*T` field is sent only when set. A plain
-`T` field is always sent. Which fields are required for a given operation is
-for the caller to know. When in doubt, check `nf_tables.h`.
+**Every attribute field is nullable.** Presence has to be explicit: a field is
+only included on the wire when it is non-nil. Which fields are required for a
+given operation is for the caller to know.
 
 ## License
 

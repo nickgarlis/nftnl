@@ -44,18 +44,22 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1677
 type Obj struct {
-	Table    string
-	Name     string
+	Table    *string
+	Name     *string
 	Data     ObjData
-	Use      uint32
+	Use      *uint32
 	Handle   *uint64
 	UserData *ObjUserData
 }
 
 func (a *Obj) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaObjTable, a.Table)
-	ae.String(nftaObjName, a.Name)
+	if a.Table != nil {
+		ae.String(nftaObjTable, *a.Table)
+	}
+	if a.Name != nil {
+		ae.String(nftaObjName, *a.Name)
+	}
 	if a.Handle != nil {
 		ae.Uint64(nftaObjHandle, *a.Handle)
 	}
@@ -85,15 +89,15 @@ func (a *Obj) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaObjTable:
-			a.Table = ad.String()
+			a.Table = new(ad.String())
 		case nftaObjName:
-			a.Name = ad.String()
+			a.Name = new(ad.String())
 		case nftaObjType:
 			objType = ObjType(ad.Uint32())
 		case nftaObjData:
 			rawData = ad.Bytes()
 		case nftaObjUse:
-			a.Use = ad.Uint32()
+			a.Use = new(ad.Uint32())
 		case nftaObjHandle:
 			v := ad.Uint64()
 			a.Handle = &v
@@ -153,16 +157,20 @@ func objDataFactory(objType ObjType) (ObjData, error) {
 // Shares nftaCounter* consts with ExprCounter in expr_attrs.go.
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1266
 type ObjCounter struct {
-	Bytes   uint64
-	Packets uint64
+	Bytes   *uint64
+	Packets *uint64
 }
 
 func (*ObjCounter) ObjType() ObjType { return ObjTypeCounter }
 
 func (a *ObjCounter) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint64(nftaCounterBytes, a.Bytes)
-	ae.Uint64(nftaCounterPackets, a.Packets)
+	if a.Bytes != nil {
+		ae.Uint64(nftaCounterBytes, *a.Bytes)
+	}
+	if a.Packets != nil {
+		ae.Uint64(nftaCounterPackets, *a.Packets)
+	}
 	return ae.Encode()
 }
 
@@ -174,9 +182,9 @@ func (a *ObjCounter) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaCounterBytes:
-			a.Bytes = ad.Uint64()
+			a.Bytes = new(ad.Uint64())
 		case nftaCounterPackets:
-			a.Packets = ad.Uint64()
+			a.Packets = new(ad.Uint64())
 		}
 	}
 	return ad.Err()
@@ -186,7 +194,7 @@ func (a *ObjCounter) unmarshal(data []byte) error {
 // Bytes is always marshaled; Flags and Consumed are optional (presence-bit guarded in libnftnl).
 // https://github.com/torvalds/linux/blob/f83a4f2a4d8c485922fba3018a64fc8f4cfd315f/include/uapi/linux/netfilter/nf_tables.h#L1366
 type ObjQuota struct {
-	Bytes    uint64
+	Bytes    *uint64
 	Flags    *QuotaFlags
 	Consumed *uint64
 }
@@ -195,7 +203,9 @@ func (*ObjQuota) ObjType() ObjType { return ObjTypeQuota }
 
 func (a *ObjQuota) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint64(nftaQuotaBytes, a.Bytes)
+	if a.Bytes != nil {
+		ae.Uint64(nftaQuotaBytes, *a.Bytes)
+	}
 	if a.Flags != nil {
 		ae.Uint32(nftaQuotaFlags, uint32(*a.Flags))
 	}
@@ -213,7 +223,7 @@ func (a *ObjQuota) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaQuotaBytes:
-			a.Bytes = ad.Uint64()
+			a.Bytes = new(ad.Uint64())
 		case nftaQuotaFlags:
 			v := ad.Uint32()
 			a.Flags = new(QuotaFlags(v))
@@ -235,7 +245,7 @@ const (
 // All fields are optional (presence-bit guarded in libnftnl).
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1633
 type ObjCtHelper struct {
-	Name    string
+	Name    *string
 	L3Proto *uint16
 	L4Proto *uint8
 }
@@ -244,8 +254,8 @@ func (*ObjCtHelper) ObjType() ObjType { return ObjTypeCtHelper }
 
 func (a *ObjCtHelper) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	if a.Name != "" {
-		ae.String(nftaCtHelperName, a.Name)
+	if a.Name != nil {
+		ae.String(nftaCtHelperName, *a.Name)
 	}
 	if a.L3Proto != nil {
 		ae.Uint16(nftaCtHelperL3proto, *a.L3Proto)
@@ -264,7 +274,7 @@ func (a *ObjCtHelper) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaCtHelperName:
-			a.Name = ad.String()
+			a.Name = new(ad.String())
 		case nftaCtHelperL3proto:
 			v := ad.Uint16()
 			a.L3Proto = &v
@@ -279,7 +289,7 @@ func (a *ObjCtHelper) unmarshal(data []byte) error {
 // Shares nftaLimit* consts with ExprLimit in expr_attrs.go.
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1227
 type ObjLimit struct {
-	Rate  uint64
+	Rate  *uint64
 	Unit  *uint64
 	Burst *uint32
 	Type  *LimitType
@@ -290,7 +300,9 @@ func (*ObjLimit) ObjType() ObjType { return ObjTypeLimit }
 
 func (a *ObjLimit) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint64(nftaLimitRate, a.Rate)
+	if a.Rate != nil {
+		ae.Uint64(nftaLimitRate, *a.Rate)
+	}
 	if a.Unit != nil {
 		ae.Uint64(nftaLimitUnit, *a.Unit)
 	}
@@ -314,7 +326,7 @@ func (a *ObjLimit) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaLimitRate:
-			a.Rate = ad.Uint64()
+			a.Rate = new(ad.Uint64())
 		case nftaLimitUnit:
 			v := ad.Uint64()
 			a.Unit = &v
@@ -454,14 +466,16 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1389
 type ObjSecmark struct {
-	Ctx string
+	Ctx *string
 }
 
 func (*ObjSecmark) ObjType() ObjType { return ObjTypeSecmark }
 
 func (a *ObjSecmark) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaSecmarkCtx, a.Ctx)
+	if a.Ctx != nil {
+		ae.String(nftaSecmarkCtx, *a.Ctx)
+	}
 	return ae.Encode()
 }
 
@@ -472,7 +486,7 @@ func (a *ObjSecmark) unmarshal(data []byte) error {
 	}
 	for ad.Next() {
 		if ad.Type() == nftaSecmarkCtx {
-			a.Ctx = ad.String()
+			a.Ctx = new(ad.String())
 		}
 	}
 	return ad.Err()
@@ -647,15 +661,19 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1930
 type TunnelKeyIP6 struct {
-	Src       [16]byte
-	Dst       [16]byte
+	Src       *[16]byte
+	Dst       *[16]byte
 	FlowLabel *uint32
 }
 
 func (a *TunnelKeyIP6) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Bytes(nftaTunnelKeyIP6Src, a.Src[:])
-	ae.Bytes(nftaTunnelKeyIP6Dst, a.Dst[:])
+	if a.Src != nil {
+		ae.Bytes(nftaTunnelKeyIP6Src, a.Src[:])
+	}
+	if a.Dst != nil {
+		ae.Bytes(nftaTunnelKeyIP6Dst, a.Dst[:])
+	}
 	if a.FlowLabel != nil {
 		ae.Uint32(nftaTunnelKeyIP6Flowlabel, *a.FlowLabel)
 	}
@@ -670,8 +688,10 @@ func (a *TunnelKeyIP6) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaTunnelKeyIP6Src:
+			a.Src = new([16]byte{})
 			copy(a.Src[:], ad.Bytes())
 		case nftaTunnelKeyIP6Dst:
+			a.Dst = new([16]byte{})
 			copy(a.Dst[:], ad.Bytes())
 		case nftaTunnelKeyIP6Flowlabel:
 			v := ad.Uint32()

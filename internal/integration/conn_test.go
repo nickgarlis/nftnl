@@ -19,17 +19,17 @@ func TestLargeDump(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "test",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("test"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
@@ -39,12 +39,12 @@ func TestLargeDump(t *testing.T) {
 			Family: nftnl.FamilyInet,
 			Flags:  netlink.Request | netlink.Create,
 			Attrs: &nftnl.Rule{
-				Table: "test",
+				Table: new("test"),
 				Chain: new("input"),
 				Expressions: []nftnl.Expr{
 					&nftnl.ExprImmediate{
-						DReg: nftnl.RegVerdict,
-						Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}},
+						DReg: new(nftnl.RegVerdict),
+						Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: new(nftnl.VerdictAccept)}},
 					},
 				},
 			},
@@ -66,7 +66,7 @@ func TestLargeDump(t *testing.T) {
 		Type:   nftnl.MsgGetRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("dump rules: %v", err)
@@ -87,17 +87,17 @@ func TestLargeRuleset(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "test",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("test"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
@@ -108,12 +108,12 @@ func TestLargeRuleset(t *testing.T) {
 			Family: nftnl.FamilyInet,
 			Flags:  netlink.Request | netlink.Create,
 			Attrs: &nftnl.Rule{
-				Table: "test",
+				Table: new("test"),
 				Chain: new("input"),
 				Expressions: []nftnl.Expr{
 					&nftnl.ExprImmediate{
-						DReg: nftnl.RegVerdict,
-						Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: nftnl.VerdictAccept}},
+						DReg: new(nftnl.RegVerdict),
+						Data: &nftnl.ExprData{Verdict: &nftnl.ExprVerdict{Code: new(nftnl.VerdictAccept)}},
 					},
 				},
 			},
@@ -128,7 +128,7 @@ func TestLargeRuleset(t *testing.T) {
 		Type:   nftnl.MsgGetRule,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Rule{Table: "test", Chain: new("input")},
+		Attrs:  &nftnl.Rule{Table: new("test"), Chain: new("input")},
 	})
 	if err != nil {
 		t.Fatalf("get rules: %v", err)

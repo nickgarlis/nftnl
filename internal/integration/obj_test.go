@@ -17,12 +17,12 @@ func TestObj(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 
 	obj := nftnl.Obj{
-		Table: "test",
-		Name:  "mycounter",
+		Table: new("test"),
+		Name:  new("mycounter"),
 		Data:  &nftnl.ObjCounter{},
 	}
 	comment := "test counter"
@@ -42,7 +42,7 @@ func TestObj(t *testing.T) {
 		Type:   nftnl.MsgGetObj,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Obj{Table: "test"},
+		Attrs:  &nftnl.Obj{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get objs: %v", err)
@@ -54,7 +54,7 @@ func TestObj(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected *ObjAttrs, got %T", msgs[0].Attrs)
 	}
-	if diff := cmp.Diff("mycounter", attrs.Name); diff != "" {
+	if diff := cmp.Diff("mycounter", *attrs.Name); diff != "" {
 		t.Errorf("obj name mismatch (-want +got):\n%s", diff)
 	}
 	if _, ok := attrs.Data.(*nftnl.ObjCounter); !ok {
@@ -80,7 +80,7 @@ table inet test {
 		Type:   nftnl.MsgGetObjReset,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Obj{Table: "test"},
+		Attrs:  &nftnl.Obj{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get obj reset: %v", err)
@@ -96,7 +96,7 @@ table inet test {
 	if !ok {
 		t.Fatalf("expected *ObjCounter after reset, got %T", resetAttrs.Data)
 	}
-	if diff := cmp.Diff(&nftnl.ObjCounter{}, counter); diff != "" {
+	if diff := cmp.Diff(&nftnl.ObjCounter{Bytes: new(uint64(0)), Packets: new(uint64(0))}, counter); diff != "" {
 		t.Errorf("counter mismatch after reset (-want +got):\n%s", diff)
 	}
 
@@ -107,7 +107,7 @@ table inet test {
 		Flags:  netlink.Request,
 		// Data is required: objects are keyed by name+type, so the kernel
 		// needs NFTA_OBJ_TYPE to locate the right one.
-		Attrs: &nftnl.Obj{Table: "test", Name: "mycounter", Data: &nftnl.ObjCounter{}},
+		Attrs: &nftnl.Obj{Table: new("test"), Name: new("mycounter"), Data: &nftnl.ObjCounter{}},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete obj: %v", err)
@@ -116,7 +116,7 @@ table inet test {
 		Type:   nftnl.MsgGetObj,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Obj{Table: "test"},
+		Attrs:  &nftnl.Obj{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get objs after delete: %v", err)
@@ -130,7 +130,7 @@ table inet test {
 		Type:   nftnl.MsgDestroyObj,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Obj{Table: "test", Name: "mycounter", Data: &nftnl.ObjCounter{}},
+		Attrs:  &nftnl.Obj{Table: new("test"), Name: new("mycounter"), Data: &nftnl.ObjCounter{}},
 	})
 	if _, err := conn.SendBatch(destroy); err != nil {
 		t.Fatalf("destroy obj (idempotent): %v", err)

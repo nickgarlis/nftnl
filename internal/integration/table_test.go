@@ -17,7 +17,7 @@ func TestTable(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	if _, err := conn.SendBatch(batch); err != nil {
 		t.Fatalf("create table: %v", err)
@@ -39,7 +39,7 @@ func TestTable(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected *TableAttrs, got %T", msgs[0].Attrs)
 	}
-	if diff := cmp.Diff("test", attrs.Name); diff != "" {
+	if diff := cmp.Diff("test", *attrs.Name); diff != "" {
 		t.Errorf("table name mismatch (-want +got):\n%s", diff)
 	}
 
@@ -48,7 +48,7 @@ func TestTable(t *testing.T) {
 		Type:   nftnl.MsgDelTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete table: %v", err)
@@ -70,7 +70,7 @@ func TestTable(t *testing.T) {
 		Type:   nftnl.MsgDestroyTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	if _, err := conn.SendBatch(destroy); err != nil {
 		t.Fatalf("destroy table (idempotent): %v", err)

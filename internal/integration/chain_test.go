@@ -17,17 +17,17 @@ func TestChain(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Chain{
-			Table:  "test",
-			Name:   "input",
-			Type:   "filter",
-			Hook:   &nftnl.Hook{HookNum: nftnl.HookLocalIn, Priority: nftnl.PriorityFilter},
+			Table:  new("test"),
+			Name:   new("input"),
+			Type:   new("filter"),
+			Hook:   &nftnl.Hook{HookNum: new(nftnl.HookLocalIn), Priority: new(nftnl.Priority(nftnl.PriorityFilter))},
 			Policy: new(nftnl.ChainPolicyAccept),
 		},
 	})
@@ -39,7 +39,7 @@ func TestChain(t *testing.T) {
 		Type:   nftnl.MsgGetChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Chain{Table: "test"},
+		Attrs:  &nftnl.Chain{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get chains: %v", err)
@@ -51,13 +51,13 @@ func TestChain(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected *ChainAttrs, got %T", msgs[0].Attrs)
 	}
-	if diff := cmp.Diff("input", attrs.Name); diff != "" {
+	if diff := cmp.Diff("input", *attrs.Name); diff != "" {
 		t.Errorf("chain name mismatch (-want +got):\n%s", diff)
 	}
 	if attrs.Hook == nil {
 		t.Fatal("chain has no hook")
 	}
-	if diff := cmp.Diff(nftnl.HookLocalIn, attrs.Hook.HookNum); diff != "" {
+	if diff := cmp.Diff(nftnl.HookLocalIn, *attrs.Hook.HookNum); diff != "" {
 		t.Errorf("hook number mismatch (-want +got):\n%s", diff)
 	}
 	if attrs.Policy == nil {
@@ -79,7 +79,7 @@ table inet test {
 		Type:   nftnl.MsgDelChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Chain{Table: "test", Name: "input"},
+		Attrs:  &nftnl.Chain{Table: new("test"), Name: new("input")},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete chain: %v", err)
@@ -88,7 +88,7 @@ table inet test {
 		Type:   nftnl.MsgGetChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Chain{Table: "test"},
+		Attrs:  &nftnl.Chain{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get chains after delete: %v", err)
@@ -102,7 +102,7 @@ table inet test {
 		Type:   nftnl.MsgDestroyChain,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Chain{Table: "test", Name: "input"},
+		Attrs:  &nftnl.Chain{Table: new("test"), Name: new("input")},
 	})
 	if _, err := conn.SendBatch(destroy); err != nil {
 		t.Fatalf("destroy chain (idempotent): %v", err)

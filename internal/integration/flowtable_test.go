@@ -17,15 +17,15 @@ func TestFlowtable(t *testing.T) {
 		Type:   nftnl.MsgNewTable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Table{Name: "test"},
+		Attrs:  &nftnl.Table{Name: new("test")},
 	})
 	batch.Add(nftnl.Msg{
 		Type:   nftnl.MsgNewFlowtable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Create,
 		Attrs: &nftnl.Flowtable{
-			Table: "test",
-			Name:  "ft",
+			Table: new("test"),
+			Name:  new("ft"),
 			Hook: &nftnl.FlowtableHook{
 				HookNum:  new(nftnl.HookNum(0)), // NF_NETDEV_INGRESS
 				Priority: new(int32(0)),
@@ -41,7 +41,7 @@ func TestFlowtable(t *testing.T) {
 		Type:   nftnl.MsgGetFlowtable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Flowtable{Table: "test"},
+		Attrs:  &nftnl.Flowtable{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get flowtables: %v", err)
@@ -53,7 +53,7 @@ func TestFlowtable(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected *FlowtableAttrs, got %T", msgs[0].Attrs)
 	}
-	if diff := cmp.Diff("ft", attrs.Name); diff != "" {
+	if diff := cmp.Diff("ft", *attrs.Name); diff != "" {
 		t.Errorf("flowtable name mismatch (-want +got):\n%s", diff)
 	}
 	if attrs.Hook == nil {
@@ -76,7 +76,7 @@ table inet test {
 		Type:   nftnl.MsgDelFlowtable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Flowtable{Table: "test", Name: "ft"},
+		Attrs:  &nftnl.Flowtable{Table: new("test"), Name: new("ft")},
 	})
 	if _, err := conn.SendBatch(del); err != nil {
 		t.Fatalf("delete flowtable: %v", err)
@@ -85,7 +85,7 @@ table inet test {
 		Type:   nftnl.MsgGetFlowtable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request | netlink.Dump,
-		Attrs:  &nftnl.Flowtable{Table: "test"},
+		Attrs:  &nftnl.Flowtable{Table: new("test")},
 	})
 	if err != nil {
 		t.Fatalf("get flowtables after delete: %v", err)
@@ -99,7 +99,7 @@ table inet test {
 		Type:   nftnl.MsgDestroyFlowtable,
 		Family: nftnl.FamilyInet,
 		Flags:  netlink.Request,
-		Attrs:  &nftnl.Flowtable{Table: "test", Name: "ft"},
+		Attrs:  &nftnl.Flowtable{Table: new("test"), Name: new("ft")},
 	})
 	if _, err := conn.SendBatch(destroy); err != nil {
 		t.Fatalf("destroy flowtable (idempotent): %v", err)

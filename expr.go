@@ -250,11 +250,11 @@ const (
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L597
 type ExprBitwise struct {
 	// Source register
-	SReg Reg
+	SReg *Reg
 	// Destination register
-	DReg Reg
+	DReg *Reg
 	// Length of operants
-	Len uint32
+	Len *uint32
 	// Mask value
 	Mask *ExprData
 	// XOR value
@@ -271,9 +271,15 @@ func (ExprBitwise) exprName() exprName { return exprNameBitwise }
 
 func (a *ExprBitwise) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaBitwiseSreg, uint32(a.SReg))
-	ae.Uint32(nftaBitwiseDreg, uint32(a.DReg))
-	ae.Uint32(nftaBitwiseLen, a.Len)
+	if a.SReg != nil {
+		ae.Uint32(nftaBitwiseSreg, uint32(*a.SReg))
+	}
+	if a.DReg != nil {
+		ae.Uint32(nftaBitwiseDreg, uint32(*a.DReg))
+	}
+	if a.Len != nil {
+		ae.Uint32(nftaBitwiseLen, *a.Len)
+	}
 	if a.Mask != nil {
 		b, err := a.Mask.marshal()
 		if err != nil {
@@ -312,11 +318,11 @@ func (a *ExprBitwise) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaBitwiseSreg:
-			a.SReg = Reg(ad.Uint32())
+			a.SReg = new(Reg(ad.Uint32()))
 		case nftaBitwiseDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaBitwiseLen:
-			a.Len = ad.Uint32()
+			a.Len = new(ad.Uint32())
 		case nftaBitwiseMask:
 			a.Mask = &ExprData{}
 			if err := a.Mask.unmarshal(ad.Bytes()); err != nil {
@@ -369,26 +375,36 @@ const (
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L648
 type ExprByteorder struct {
 	// Source register
-	SReg Reg
+	SReg *Reg
 	// Destination register
-	DReg Reg
+	DReg *Reg
 	// Byteorder operators
-	Op ByteorderOp
+	Op *ByteorderOp
 	// Length of the data
-	Len uint32
+	Len *uint32
 	// Data size in bytes, 2 or 4
-	Size uint32
+	Size *uint32
 }
 
 func (ExprByteorder) exprName() exprName { return exprNameByteorder }
 
 func (a *ExprByteorder) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaByteorderSreg, uint32(a.SReg))
-	ae.Uint32(nftaByteorderDreg, uint32(a.DReg))
-	ae.Uint32(nftaByteorderOp, uint32(a.Op))
-	ae.Uint32(nftaByteorderLen, a.Len)
-	ae.Uint32(nftaByteorderSize, a.Size)
+	if a.SReg != nil {
+		ae.Uint32(nftaByteorderSreg, uint32(*a.SReg))
+	}
+	if a.DReg != nil {
+		ae.Uint32(nftaByteorderDreg, uint32(*a.DReg))
+	}
+	if a.Op != nil {
+		ae.Uint32(nftaByteorderOp, uint32(*a.Op))
+	}
+	if a.Len != nil {
+		ae.Uint32(nftaByteorderLen, *a.Len)
+	}
+	if a.Size != nil {
+		ae.Uint32(nftaByteorderSize, *a.Size)
+	}
 	return ae.Encode()
 }
 
@@ -400,15 +416,15 @@ func (a *ExprByteorder) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaByteorderSreg:
-			a.SReg = Reg(ad.Uint32())
+			a.SReg = new(Reg(ad.Uint32()))
 		case nftaByteorderDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaByteorderOp:
-			a.Op = ByteorderOp(ad.Uint32())
+			a.Op = new(ByteorderOp(ad.Uint32()))
 		case nftaByteorderLen:
-			a.Len = ad.Uint32()
+			a.Len = new(ad.Uint32())
 		case nftaByteorderSize:
-			a.Size = ad.Uint32()
+			a.Size = new(ad.Uint32())
 		}
 	}
 	return ad.Err()
@@ -436,8 +452,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L687
 type ExprCmp struct {
-	SReg Reg
-	Op   CmpOp
+	SReg *Reg
+	Op   *CmpOp
 	Data *ExprData
 }
 
@@ -445,8 +461,12 @@ func (ExprCmp) exprName() exprName { return exprNameCmp }
 
 func (a *ExprCmp) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaCmpSreg, uint32(a.SReg))
-	ae.Uint32(nftaCmpOp, uint32(a.Op))
+	if a.SReg != nil {
+		ae.Uint32(nftaCmpSreg, uint32(*a.SReg))
+	}
+	if a.Op != nil {
+		ae.Uint32(nftaCmpOp, uint32(*a.Op))
+	}
 	if a.Data != nil {
 		b, err := a.Data.marshal()
 		if err != nil {
@@ -465,9 +485,9 @@ func (a *ExprCmp) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaCmpSreg:
-			a.SReg = Reg(ad.Uint32())
+			a.SReg = new(Reg(ad.Uint32()))
 		case nftaCmpOp:
-			a.Op = CmpOp(ad.Uint32())
+			a.Op = new(CmpOp(ad.Uint32()))
 		case nftaCmpData:
 			a.Data = &ExprData{}
 			if err := a.Data.unmarshal(ad.Bytes()); err != nil {
@@ -537,16 +557,20 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1266
 type ExprCounter struct {
-	Bytes   uint64
-	Packets uint64
+	Bytes   *uint64
+	Packets *uint64
 }
 
 func (ExprCounter) exprName() exprName { return exprNameCounter }
 
 func (a *ExprCounter) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint64(nftaCounterBytes, a.Bytes)
-	ae.Uint64(nftaCounterPackets, a.Packets)
+	if a.Bytes != nil {
+		ae.Uint64(nftaCounterBytes, *a.Bytes)
+	}
+	if a.Packets != nil {
+		ae.Uint64(nftaCounterPackets, *a.Packets)
+	}
 	return ae.Encode()
 }
 
@@ -558,9 +582,9 @@ func (a *ExprCounter) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaCounterBytes:
-			a.Bytes = ad.Uint64()
+			a.Bytes = new(ad.Uint64())
 		case nftaCounterPackets:
-			a.Packets = ad.Uint64()
+			a.Packets = new(ad.Uint64())
 		}
 	}
 	return ad.Err()
@@ -625,7 +649,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1189
 type ExprCt struct {
-	Key       CTKey
+	Key       *CTKey
 	DReg      *Reg
 	SReg      *Reg
 	Direction *uint8
@@ -635,7 +659,9 @@ func (ExprCt) exprName() exprName { return exprNameCt }
 
 func (a *ExprCt) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaCtKey, uint32(a.Key))
+	if a.Key != nil {
+		ae.Uint32(nftaCtKey, uint32(*a.Key))
+	}
 	if a.DReg != nil {
 		ae.Uint32(nftaCtDreg, uint32(*a.DReg))
 	}
@@ -656,7 +682,7 @@ func (a *ExprCt) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaCtKey:
-			a.Key = CTKey(ad.Uint32())
+			a.Key = new(CTKey(ad.Uint32()))
 		case nftaCtDreg:
 			v := Reg(ad.Uint32())
 			a.DReg = &v
@@ -793,9 +819,9 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L767
 type ExprDynset struct {
-	SetName  string
-	Op       DynsetOp
-	SregKey  uint32
+	SetName  *string
+	Op       *DynsetOp
+	SregKey  *uint32
 	SetID    *uint32
 	SregData *uint32
 	Timeout  *uint64
@@ -807,9 +833,15 @@ func (ExprDynset) exprName() exprName { return exprNameDynset }
 
 func (a *ExprDynset) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaDynsetSetName, a.SetName)
-	ae.Uint32(nftaDynsetOp, uint32(a.Op))
-	ae.Uint32(nftaDynsetSregKey, a.SregKey)
+	if a.SetName != nil {
+		ae.String(nftaDynsetSetName, *a.SetName)
+	}
+	if a.Op != nil {
+		ae.Uint32(nftaDynsetOp, uint32(*a.Op))
+	}
+	if a.SregKey != nil {
+		ae.Uint32(nftaDynsetSregKey, *a.SregKey)
+	}
 	if a.SetID != nil {
 		ae.Uint32(nftaDynsetSetID, *a.SetID)
 	}
@@ -840,11 +872,11 @@ func (a *ExprDynset) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaDynsetSetName:
-			a.SetName = ad.String()
+			a.SetName = new(ad.String())
 		case nftaDynsetOp:
-			a.Op = DynsetOp(ad.Uint32())
+			a.Op = new(DynsetOp(ad.Uint32()))
 		case nftaDynsetSregKey:
-			a.SregKey = ad.Uint32()
+			a.SregKey = new(ad.Uint32())
 		case nftaDynsetSetID:
 			v := ad.Uint32()
 			a.SetID = &v
@@ -999,18 +1031,24 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1597
 type ExprFib struct {
-	DReg   Reg
-	Result FibResult
-	Flags  FibFlags
+	DReg   *Reg
+	Result *FibResult
+	Flags  *FibFlags
 }
 
 func (ExprFib) exprName() exprName { return exprNameFib }
 
 func (a *ExprFib) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaFibDreg, uint32(a.DReg))
-	ae.Uint32(nftaFibResult, uint32(a.Result))
-	ae.Uint32(nftaFibFlags, uint32(a.Flags))
+	if a.DReg != nil {
+		ae.Uint32(nftaFibDreg, uint32(*a.DReg))
+	}
+	if a.Result != nil {
+		ae.Uint32(nftaFibResult, uint32(*a.Result))
+	}
+	if a.Flags != nil {
+		ae.Uint32(nftaFibFlags, uint32(*a.Flags))
+	}
 	return ae.Encode()
 }
 
@@ -1022,11 +1060,11 @@ func (a *ExprFib) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaFibDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaFibResult:
-			a.Result = FibResult(ad.Uint32())
+			a.Result = new(FibResult(ad.Uint32()))
 		case nftaFibFlags:
-			a.Flags = FibFlags(ad.Uint32())
+			a.Flags = new(FibFlags(ad.Uint32()))
 		}
 	}
 	return ad.Err()
@@ -1039,14 +1077,16 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1207
 type ExprFlowOffload struct {
-	TableName string
+	TableName *string
 }
 
 func (ExprFlowOffload) exprName() exprName { return exprNameFlowOffload }
 
 func (a *ExprFlowOffload) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaFlowTableName, a.TableName)
+	if a.TableName != nil {
+		ae.String(nftaFlowTableName, *a.TableName)
+	}
 	return ae.Encode()
 }
 
@@ -1058,7 +1098,7 @@ func (a *ExprFlowOffload) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaFlowTableName:
-			a.TableName = ad.String()
+			a.TableName = new(ad.String())
 		}
 	}
 	return ad.Err()
@@ -1073,7 +1113,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1547
 type ExprFwd struct {
-	SregDev  uint32
+	SregDev  *uint32
 	SregAddr *uint32
 	NfProto  *Family
 }
@@ -1082,7 +1122,9 @@ func (ExprFwd) exprName() exprName { return exprNameFwd }
 
 func (a *ExprFwd) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaFwdSregDev, a.SregDev)
+	if a.SregDev != nil {
+		ae.Uint32(nftaFwdSregDev, *a.SregDev)
+	}
 	if a.SregAddr != nil {
 		ae.Uint32(nftaFwdSregAddr, *a.SregAddr)
 	}
@@ -1100,7 +1142,7 @@ func (a *ExprFwd) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaFwdSregDev:
-			a.SregDev = ad.Uint32()
+			a.SregDev = new(ad.Uint32())
 		case nftaFwdSregAddr:
 			v := ad.Uint32()
 			a.SregAddr = &v
@@ -1133,8 +1175,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1041
 type ExprHash struct {
-	SReg    Reg
-	DReg    Reg
+	SReg    *Reg
+	DReg    *Reg
 	Len     *uint32
 	Modulus *uint32
 	Seed    *uint32
@@ -1146,8 +1188,12 @@ func (ExprHash) exprName() exprName { return exprNameHash }
 
 func (a *ExprHash) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaHashSreg, uint32(a.SReg))
-	ae.Uint32(nftaHashDreg, uint32(a.DReg))
+	if a.SReg != nil {
+		ae.Uint32(nftaHashSreg, uint32(*a.SReg))
+	}
+	if a.DReg != nil {
+		ae.Uint32(nftaHashDreg, uint32(*a.DReg))
+	}
 	if a.Len != nil {
 		ae.Uint32(nftaHashLen, *a.Len)
 	}
@@ -1174,9 +1220,9 @@ func (a *ExprHash) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaHashSreg:
-			a.SReg = Reg(ad.Uint32())
+			a.SReg = new(Reg(ad.Uint32()))
 		case nftaHashDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaHashLen:
 			v := ad.Uint32()
 			a.Len = &v
@@ -1205,7 +1251,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L559
 type ExprImmediate struct {
-	DReg Reg
+	DReg *Reg
 	Data *ExprData
 }
 
@@ -1213,7 +1259,9 @@ func (ExprImmediate) exprName() exprName { return exprNameImmediate }
 
 func (a *ExprImmediate) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaImmediateDreg, uint32(a.DReg))
+	if a.DReg != nil {
+		ae.Uint32(nftaImmediateDreg, uint32(*a.DReg))
+	}
 	if a.Data != nil {
 		b, err := a.Data.marshal()
 		if err != nil {
@@ -1232,7 +1280,7 @@ func (a *ExprImmediate) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaImmediateDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaImmediateData:
 			a.Data = &ExprData{}
 			if err := a.Data.unmarshal(ad.Bytes()); err != nil {
@@ -1405,7 +1453,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1227
 type ExprLimit struct {
-	Rate  uint64
+	Rate  *uint64
 	Unit  *uint64
 	Burst *uint32
 	Type  *LimitType
@@ -1416,7 +1464,9 @@ func (ExprLimit) exprName() exprName { return exprNameLimit }
 
 func (a *ExprLimit) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint64(nftaLimitRate, a.Rate)
+	if a.Rate != nil {
+		ae.Uint64(nftaLimitRate, *a.Rate)
+	}
 	if a.Unit != nil {
 		ae.Uint64(nftaLimitUnit, *a.Unit)
 	}
@@ -1440,7 +1490,7 @@ func (a *ExprLimit) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaLimitRate:
-			a.Rate = ad.Uint64()
+			a.Rate = new(ad.Uint64())
 		case nftaLimitUnit:
 			v := ad.Uint64()
 			a.Unit = &v
@@ -1497,7 +1547,7 @@ const (
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1296
 type ExprLog struct {
 	Group      *uint16
-	Prefix     string
+	Prefix     *string
 	Snaplen    *uint32
 	Qthreshold *uint16
 	Level      *LogLevel
@@ -1511,8 +1561,8 @@ func (a *ExprLog) marshal() ([]byte, error) {
 	if a.Group != nil {
 		ae.Uint16(nftaLogGroup, *a.Group)
 	}
-	if a.Prefix != "" {
-		ae.String(nftaLogPrefix, a.Prefix)
+	if a.Prefix != nil {
+		ae.String(nftaLogPrefix, *a.Prefix)
 	}
 	if a.Snaplen != nil {
 		ae.Uint32(nftaLogSnaplen, *a.Snaplen)
@@ -1540,7 +1590,7 @@ func (a *ExprLog) unmarshal(data []byte) error {
 			v := ad.Uint16()
 			a.Group = &v
 		case nftaLogPrefix:
-			a.Prefix = ad.String()
+			a.Prefix = new(ad.String())
 		case nftaLogSnaplen:
 			v := ad.Uint32()
 			a.Snaplen = &v
@@ -1576,8 +1626,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L736
 type ExprLookup struct {
-	Set   string
-	SReg  Reg
+	Set   *string
+	SReg  *Reg
 	DReg  *Reg
 	SetID *uint32
 	Flags *LookupFlags
@@ -1587,8 +1637,12 @@ func (ExprLookup) exprName() exprName { return exprNameLookup }
 
 func (a *ExprLookup) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaLookupSet, a.Set)
-	ae.Uint32(nftaLookupSreg, uint32(a.SReg))
+	if a.Set != nil {
+		ae.String(nftaLookupSet, *a.Set)
+	}
+	if a.SReg != nil {
+		ae.Uint32(nftaLookupSreg, uint32(*a.SReg))
+	}
 	if a.DReg != nil {
 		ae.Uint32(nftaLookupDreg, uint32(*a.DReg))
 	}
@@ -1609,9 +1663,9 @@ func (a *ExprLookup) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaLookupSet:
-			a.Set = ad.String()
+			a.Set = new(ad.String())
 		case nftaLookupSreg:
-			a.SReg = Reg(ad.Uint32())
+			a.SReg = new(Reg(ad.Uint32()))
 		case nftaLookupDreg:
 			v := Reg(ad.Uint32())
 			a.DReg = &v
@@ -1744,7 +1798,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/f83a4f2a4d8c485922fba3018a64fc8f4cfd315f/include/uapi/linux/netfilter/nf_tables.h#L1069
 type ExprMeta struct {
-	Key  MetaKey
+	Key  *MetaKey
 	DReg *Reg
 	SReg *Reg
 }
@@ -1753,7 +1807,9 @@ func (ExprMeta) exprName() exprName { return exprNameMeta }
 
 func (a *ExprMeta) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaMetaKey, uint32(a.Key))
+	if a.Key != nil {
+		ae.Uint32(nftaMetaKey, uint32(*a.Key))
+	}
 	if a.DReg != nil {
 		ae.Uint32(nftaMetaDreg, uint32(*a.DReg))
 	}
@@ -1771,7 +1827,7 @@ func (a *ExprMeta) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaMetaKey:
-			a.Key = MetaKey(ad.Uint32())
+			a.Key = new(MetaKey(ad.Uint32()))
 		case nftaMetaDreg:
 			v := Reg(ad.Uint32())
 			a.DReg = &v
@@ -1804,7 +1860,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1461
 type ExprNat struct {
-	Type        NatType
+	Type        *NatType
 	Family      *Family
 	RegAddrMin  *uint32
 	RegAddrMax  *uint32
@@ -1817,7 +1873,9 @@ func (ExprNat) exprName() exprName { return exprNameNat }
 
 func (a *ExprNat) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaNatType, uint32(a.Type))
+	if a.Type != nil {
+		ae.Uint32(nftaNatType, uint32(*a.Type))
+	}
 	if a.Family != nil {
 		ae.Uint32(nftaNatFamily, uint32(*a.Family))
 	}
@@ -1847,7 +1905,7 @@ func (a *ExprNat) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaNatType:
-			a.Type = NatType(ad.Uint32())
+			a.Type = new(NatType(ad.Uint32()))
 		case nftaNatFamily:
 			v := Family(ad.Uint32())
 			a.Family = &v
@@ -1949,10 +2007,10 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1563
 type ExprObjref struct {
-	ImmType uint32
-	ImmName string
+	ImmType *uint32
+	ImmName *string
 	SetSreg *uint32
-	SetName string
+	SetName *string
 	SetID   *uint32
 }
 
@@ -1960,15 +2018,17 @@ func (ExprObjref) exprName() exprName { return exprNameObjref }
 
 func (a *ExprObjref) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaObjrefImmType, a.ImmType)
-	if a.ImmName != "" {
-		ae.String(nftaObjrefImmName, a.ImmName)
+	if a.ImmType != nil {
+		ae.Uint32(nftaObjrefImmType, *a.ImmType)
+	}
+	if a.ImmName != nil {
+		ae.String(nftaObjrefImmName, *a.ImmName)
 	}
 	if a.SetSreg != nil {
 		ae.Uint32(nftaObjrefSetSreg, *a.SetSreg)
 	}
-	if a.SetName != "" {
-		ae.String(nftaObjrefSetName, a.SetName)
+	if a.SetName != nil {
+		ae.String(nftaObjrefSetName, *a.SetName)
 	}
 	if a.SetID != nil {
 		ae.Uint32(nftaObjrefSetID, *a.SetID)
@@ -1984,14 +2044,14 @@ func (a *ExprObjref) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaObjrefImmType:
-			a.ImmType = ad.Uint32()
+			a.ImmType = new(ad.Uint32())
 		case nftaObjrefImmName:
-			a.ImmName = ad.String()
+			a.ImmName = new(ad.String())
 		case nftaObjrefSetSreg:
 			v := ad.Uint32()
 			a.SetSreg = &v
 		case nftaObjrefSetName:
-			a.SetName = ad.String()
+			a.SetName = new(ad.String())
 		case nftaObjrefSetID:
 			v := ad.Uint32()
 			a.SetID = &v
@@ -2016,7 +2076,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1754
 type ExprOsf struct {
-	DReg  Reg
+	DReg  *Reg
 	TTL   *uint8
 	Flags *OsfFlags
 }
@@ -2025,7 +2085,9 @@ func (ExprOsf) exprName() exprName { return exprNameOsf }
 
 func (a *ExprOsf) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaOsfDreg, uint32(a.DReg))
+	if a.DReg != nil {
+		ae.Uint32(nftaOsfDreg, uint32(*a.DReg))
+	}
 	if a.TTL != nil {
 		ae.Uint8(nftaOsfTtl, *a.TTL)
 	}
@@ -2046,7 +2108,7 @@ func (a *ExprOsf) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaOsfDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaOsfTtl:
 			v := ad.Uint8()
 			a.TTL = &v
@@ -2103,9 +2165,9 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L855
 type ExprPayload struct {
-	Base       PayloadBase
-	Offset     uint32
-	Len        uint32
+	Base       *PayloadBase
+	Offset     *uint32
+	Len        *uint32
 	DReg       *Reg
 	SReg       *Reg
 	CsumType   *PayloadCsumType
@@ -2117,9 +2179,15 @@ func (ExprPayload) exprName() exprName { return exprNamePayload }
 
 func (a *ExprPayload) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaPayloadBase, uint32(a.Base))
-	ae.Uint32(nftaPayloadOffset, a.Offset)
-	ae.Uint32(nftaPayloadLen, a.Len)
+	if a.Base != nil {
+		ae.Uint32(nftaPayloadBase, uint32(*a.Base))
+	}
+	if a.Offset != nil {
+		ae.Uint32(nftaPayloadOffset, *a.Offset)
+	}
+	if a.Len != nil {
+		ae.Uint32(nftaPayloadLen, *a.Len)
+	}
 	if a.DReg != nil {
 		ae.Uint32(nftaPayloadDreg, uint32(*a.DReg))
 	}
@@ -2146,11 +2214,11 @@ func (a *ExprPayload) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaPayloadBase:
-			a.Base = PayloadBase(ad.Uint32())
+			a.Base = new(PayloadBase(ad.Uint32()))
 		case nftaPayloadOffset:
-			a.Offset = ad.Uint32()
+			a.Offset = new(ad.Uint32())
 		case nftaPayloadLen:
-			a.Len = ad.Uint32()
+			a.Len = new(ad.Uint32())
 		case nftaPayloadDreg:
 			v := Reg(ad.Uint32())
 			a.DReg = &v
@@ -2255,7 +2323,7 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1372
 type ExprQuota struct {
-	Bytes    uint64
+	Bytes    *uint64
 	Flags    *QuotaFlags
 	Consumed *uint64
 }
@@ -2264,7 +2332,9 @@ func (ExprQuota) exprName() exprName { return exprNameQuota }
 
 func (a *ExprQuota) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint64(nftaQuotaBytes, a.Bytes)
+	if a.Bytes != nil {
+		ae.Uint64(nftaQuotaBytes, *a.Bytes)
+	}
 	if a.Flags != nil {
 		ae.Uint32(nftaQuotaFlags, uint32(*a.Flags))
 	}
@@ -2282,7 +2352,7 @@ func (a *ExprQuota) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaQuotaBytes:
-			a.Bytes = ad.Uint64()
+			a.Bytes = new(ad.Uint64())
 		case nftaQuotaFlags:
 			v := QuotaFlags(ad.Uint32())
 			a.Flags = &v
@@ -2312,8 +2382,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L714
 type ExprRange struct {
-	SReg     Reg
-	Op       RangeOp
+	SReg     *Reg
+	Op       *RangeOp
 	FromData *ExprData
 	ToData   *ExprData
 }
@@ -2322,8 +2392,12 @@ func (ExprRange) exprName() exprName { return exprNameRange }
 
 func (a *ExprRange) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaRangeSreg, uint32(a.SReg))
-	ae.Uint32(nftaRangeOp, uint32(a.Op))
+	if a.SReg != nil {
+		ae.Uint32(nftaRangeSreg, uint32(*a.SReg))
+	}
+	if a.Op != nil {
+		ae.Uint32(nftaRangeOp, uint32(*a.Op))
+	}
 	if a.FromData != nil {
 		b, err := a.FromData.marshal()
 		if err != nil {
@@ -2349,9 +2423,9 @@ func (a *ExprRange) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaRangeSreg:
-			a.SReg = Reg(ad.Uint32())
+			a.SReg = new(Reg(ad.Uint32()))
 		case nftaRangeOp:
-			a.Op = RangeOp(ad.Uint32())
+			a.Op = new(RangeOp(ad.Uint32()))
 		case nftaRangeFromData:
 			a.FromData = &ExprData{}
 			if err := a.FromData.unmarshal(ad.Bytes()); err != nil {
@@ -2561,8 +2635,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L1099
 type ExprSocket struct {
-	Key   SocketKey
-	DReg  Reg
+	Key   *SocketKey
+	DReg  *Reg
 	Level *uint32
 }
 
@@ -2570,8 +2644,12 @@ func (ExprSocket) exprName() exprName { return exprNameSocket }
 
 func (a *ExprSocket) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaSocketKey, uint32(a.Key))
-	ae.Uint32(nftaSocketDreg, uint32(a.DReg))
+	if a.Key != nil {
+		ae.Uint32(nftaSocketKey, uint32(*a.Key))
+	}
+	if a.DReg != nil {
+		ae.Uint32(nftaSocketDreg, uint32(*a.DReg))
+	}
 	if a.Level != nil {
 		ae.Uint32(nftaSocketLevel, *a.Level)
 	}
@@ -2586,9 +2664,9 @@ func (a *ExprSocket) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaSocketKey:
-			a.Key = SocketKey(ad.Uint32())
+			a.Key = new(SocketKey(ad.Uint32()))
 		case nftaSocketDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaSocketLevel:
 			v := ad.Uint32()
 			a.Level = &v
@@ -2736,8 +2814,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L2013
 type ExprTunnel struct {
-	Key  TunnelKey
-	DReg Reg
+	Key  *TunnelKey
+	DReg *Reg
 	Mode *TunnelMode
 }
 
@@ -2745,8 +2823,12 @@ func (ExprTunnel) exprName() exprName { return exprNameTunnel }
 
 func (a *ExprTunnel) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaTunnelKey, uint32(a.Key))
-	ae.Uint32(nftaTunnelDreg, uint32(a.DReg))
+	if a.Key != nil {
+		ae.Uint32(nftaTunnelKey, uint32(*a.Key))
+	}
+	if a.DReg != nil {
+		ae.Uint32(nftaTunnelDreg, uint32(*a.DReg))
+	}
 	if a.Mode != nil {
 		ae.Uint32(nftaTunnelMode, uint32(*a.Mode))
 	}
@@ -2761,9 +2843,9 @@ func (a *ExprTunnel) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaTunnelKey:
-			a.Key = TunnelKey(ad.Uint32())
+			a.Key = new(TunnelKey(ad.Uint32()))
 		case nftaTunnelDreg:
-			a.DReg = Reg(ad.Uint32())
+			a.DReg = new(Reg(ad.Uint32()))
 		case nftaTunnelMode:
 			v := TunnelMode(ad.Uint32())
 			a.Mode = &v
@@ -2804,8 +2886,8 @@ const (
 
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L529
 type ExprVerdict struct {
-	Code    Verdict
-	Chain   string
+	Code    *Verdict
+	Chain   *string
 	ChainID *uint32
 }
 
@@ -2813,9 +2895,11 @@ func (ExprVerdict) exprName() exprName { return exprNameVerdict }
 
 func (a *ExprVerdict) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.Uint32(nftaVerdictCode, uint32(int32(a.Code)))
-	if a.Chain != "" {
-		ae.String(nftaVerdictChain, a.Chain)
+	if a.Code != nil {
+		ae.Uint32(nftaVerdictCode, uint32(int32(*a.Code)))
+	}
+	if a.Chain != nil {
+		ae.String(nftaVerdictChain, *a.Chain)
 	}
 	if a.ChainID != nil {
 		ae.Uint32(nftaVerdictChainID, *a.ChainID)
@@ -2831,9 +2915,9 @@ func (a *ExprVerdict) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaVerdictCode:
-			a.Code = Verdict(int32(ad.Uint32()))
+			a.Code = new(Verdict(int32(ad.Uint32())))
 		case nftaVerdictChain:
-			a.Chain = ad.String()
+			a.Chain = new(ad.String())
 		case nftaVerdictChainID:
 			v := ad.Uint32()
 			a.ChainID = &v

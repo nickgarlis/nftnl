@@ -33,7 +33,7 @@ const (
 // https://github.com/torvalds/linux/blob/v7.1/include/uapi/linux/netfilter/nf_tables.h#L199
 type Table struct {
 	// Name of the table
-	Name string
+	Name *string
 	// Bitmask of table flags
 	Flags *TableFlags
 	// Number of chains in this table
@@ -47,7 +47,9 @@ type Table struct {
 
 func (a *Table) marshal() ([]byte, error) {
 	ae := newAttributeEncoder()
-	ae.String(nftaTableName, a.Name)
+	if a.Name != nil {
+		ae.String(nftaTableName, *a.Name)
+	}
 	if a.Flags != nil {
 		ae.Uint32(nftaTableFlags, uint32(*a.Flags))
 	}
@@ -74,7 +76,7 @@ func (a *Table) unmarshal(data []byte) error {
 	for ad.Next() {
 		switch ad.Type() {
 		case nftaTableName:
-			a.Name = ad.String()
+			a.Name = new(ad.String())
 		case nftaTableFlags:
 			v := ad.Uint32()
 			a.Flags = new(TableFlags(v))
