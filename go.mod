@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/mdlayher/netlink v1.11.3-0.20260715220240-e72de70de7ab
-	golang.org/x/sys v0.47.0
+	golang.org/x/sys v0.48.0
 )
 
 require (
