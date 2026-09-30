@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/nickgarlis/nftnl/compare/v0.5.0...v0.6.0) (2026-09-30)
+
+
+### Features
+
+* split util into exprutil, setutil and setelemutil ([#18](https://github.com/nickgarlis/nftnl/issues/18)) ([009c253](https://github.com/nickgarlis/nftnl/commit/009c2531e17ba1d492c1d88515582466b955f0e5))
+
 ## [0.5.0](https://github.com/nickgarlis/nftnl/compare/v0.4.0...v0.5.0) (2026-08-16)
 
 
