@@ -6,7 +6,7 @@ import (
 
 	"github.com/mdlayher/netlink"
 	"github.com/nickgarlis/nftnl"
-	"github.com/nickgarlis/nftnl/util"
+	"github.com/nickgarlis/nftnl/exprutil"
 	"golang.org/x/sys/unix"
 )
 
@@ -14,15 +14,15 @@ func addr4(s string) []byte { b := netip.MustParseAddr(s).As4(); return b[:] }
 
 func TestExpressions(t *testing.T) {
 	rules := [][]nftnl.Expr{
-		util.Exprs(util.IIFName("lo"), util.Accept()),
-		util.Exprs(util.NFProtoIPv4(), util.IPv4Proto(unix.IPPROTO_TCP), util.DPort(80), util.Accept()),
-		util.Exprs(util.CTState(nftnl.CTStateEstablished|nftnl.CTStateRelated), util.Accept()),
-		util.Exprs(util.NFProtoIPv4(), util.IPv4SaddrInSet("test_set", 1), util.Accept()),
-		util.Exprs(util.Log("drop: "), util.Drop()),
-		util.Exprs(util.NFProtoIPv4(), util.IPv4Daddr(netip.MustParseAddr("127.0.0.1")), util.Drop()),
-		util.Exprs(util.NFProtoIPv4(), util.IPv4SaddrPrefix(netip.MustParsePrefix("10.0.0.0/8")), util.Accept()),
-		util.Exprs(util.NFProtoIPv6(), util.IPv6Saddr(netip.MustParseAddr("::1")), util.Accept()),
-		util.Exprs(util.NFProtoIPv6(), util.IPv6SaddrPrefix(netip.MustParsePrefix("2001:db8::/32")), util.Accept()),
+		exprutil.Concat(exprutil.IIFName("lo"), exprutil.Accept()),
+		exprutil.Concat(exprutil.NFProtoIPv4(), exprutil.IPv4Proto(unix.IPPROTO_TCP), exprutil.DPort(80), exprutil.Accept()),
+		exprutil.Concat(exprutil.CTState(nftnl.CTStateEstablished|nftnl.CTStateRelated), exprutil.Accept()),
+		exprutil.Concat(exprutil.NFProtoIPv4(), exprutil.IPv4SaddrInSet("test_set", 1), exprutil.Accept()),
+		exprutil.Concat(exprutil.Log("drop: "), exprutil.Drop()),
+		exprutil.Concat(exprutil.NFProtoIPv4(), exprutil.IPv4Daddr(netip.MustParseAddr("127.0.0.1")), exprutil.Drop()),
+		exprutil.Concat(exprutil.NFProtoIPv4(), exprutil.IPv4SaddrPrefix(netip.MustParsePrefix("10.0.0.0/8")), exprutil.Accept()),
+		exprutil.Concat(exprutil.NFProtoIPv6(), exprutil.IPv6Saddr(netip.MustParseAddr("::1")), exprutil.Accept()),
+		exprutil.Concat(exprutil.NFProtoIPv6(), exprutil.IPv6SaddrPrefix(netip.MustParsePrefix("2001:db8::/32")), exprutil.Accept()),
 	}
 	want := `
 table inet test {

@@ -1,6 +1,5 @@
-// Package util provides helper functions for working with nftables expressions,
-// addresses, and other common constructs.
-package util
+// Package exprutil provides shorthand for building common nftnl.Expr values.
+package exprutil
 
 import (
 	"net"
@@ -9,8 +8,8 @@ import (
 	"github.com/nickgarlis/nftnl"
 )
 
-// Exprs concatenates expression slices into a single []nftnl.Expr.
-func Exprs(parts ...[]nftnl.Expr) []nftnl.Expr {
+// Concat concatenates expression slices into a single []nftnl.Expr.
+func Concat(parts ...[]nftnl.Expr) []nftnl.Expr {
 	var out []nftnl.Expr
 	for _, p := range parts {
 		out = append(out, p...)
