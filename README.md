@@ -106,23 +106,47 @@ if rule, ok := nftnl.As[*nftnl.Rule](msgs[0].Attrs); ok {
 
 ## Helpers
 
-The `nftnl/util` package provides expression builders for common rule patterns:
+Helpers are optional shorthand on top of the API: everything they return can
+be written with the `nftnl` types directly. Each kind of object has its own
+`<kind>util` package.
+
+`nftnl/exprutil` builds common rule expressions:
 
 ```go
-import "github.com/nickgarlis/nftnl/util"
+import "github.com/nickgarlis/nftnl/exprutil"
 
-exprs := util.Exprs(
-    util.NFProtoIPv4(),
-    util.IPv4SaddrPrefix(netip.MustParsePrefix("10.0.0.0/8")),
-    util.Accept(),
+exprs := exprutil.Concat(
+    exprutil.NFProtoIPv4(),
+    exprutil.IPv4SaddrPrefix(netip.MustParsePrefix("10.0.0.0/8")),
+    exprutil.Accept(),
 )
 
-exprs := util.Exprs(
-    util.CTState(nftnl.CTStateEstablished | nftnl.CTStateRelated),
-    util.Accept(),
+exprs := exprutil.Concat(
+    exprutil.CTState(nftnl.CTStateEstablished | nftnl.CTStateRelated),
+    exprutil.Accept(),
 )
 
-exprs := util.Exprs(util.IIFName("eth0"), util.Drop())
+exprs := exprutil.Concat(exprutil.IIFName("eth0"), exprutil.Drop())
+```
+
+`nftnl/setutil` builds sets, and `nftnl/setelemutil` the elements that go in
+them:
+
+```go
+import (
+    "github.com/nickgarlis/nftnl/setelemutil"
+    "github.com/nickgarlis/nftnl/setutil"
+)
+
+set := setutil.IPv4Interval("filter", "allow", 1)
+
+// Attrs is optional; its timeout is converted to the kernel's milliseconds.
+elems, err := setelemutil.IPPrefix(netip.MustParsePrefix("10.0.0.0/8"),
+    &setelemutil.Attrs{Comment: "office", Timeout: 24 * time.Hour})
+
+// A range that runs to the top of its key space is sent as a start element
+// alone; the kernel reads it as extending to the end.
+elems, err := setelemutil.PortRange(60000, 65535, nil)
 ```
 
 ## Design
