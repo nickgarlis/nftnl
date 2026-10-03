@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/nickgarlis/nftnl/compare/v0.6.0...v0.6.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* set GCInterval type ([6f15a8f](https://github.com/nickgarlis/nftnl/commit/6f15a8f6ab4c6d8683ce005800d678907630df55))
+
 ## [0.6.0](https://github.com/nickgarlis/nftnl/compare/v0.5.0...v0.6.0) (2026-09-30)
 
 
