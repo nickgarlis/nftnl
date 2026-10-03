@@ -209,7 +209,7 @@ type Set struct {
 	// Default timeout value
 	Timeout *uint64
 	// Garbage collection interval
-	GCInterval *uint64
+	GCInterval *uint32
 	// User data
 	UserData *SetUserData
 	// Stateful object type
@@ -266,7 +266,7 @@ func (a *Set) marshal() ([]byte, error) {
 		ae.Uint64(nftaSetTimeout, *a.Timeout)
 	}
 	if a.GCInterval != nil {
-		ae.Uint64(nftaSetGcInterval, *a.GCInterval)
+		ae.Uint32(nftaSetGcInterval, *a.GCInterval)
 	}
 	if b := a.UserData.marshal(); b != nil {
 		ae.Bytes(nftaSetUserdata, b)
@@ -350,7 +350,7 @@ func (a *Set) unmarshal(data []byte) error {
 			v := ad.Uint64()
 			a.Timeout = &v
 		case nftaSetGcInterval:
-			v := ad.Uint64()
+			v := ad.Uint32()
 			a.GCInterval = &v
 		case nftaSetUserdata:
 			a.UserData = &SetUserData{}
