@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/nickgarlis/nftnl/compare/v0.6.1...v0.7.0) (2026-10-10)
+
+
+### Features
+
+* add setutil helpers for anonymous & non-interval sets ([348c7f3](https://github.com/nickgarlis/nftnl/commit/348c7f369db1a6669e102ffd22dfe3460251e576))
+
 ## [0.6.1](https://github.com/nickgarlis/nftnl/compare/v0.6.0...v0.6.1) (2026-10-03)
 
 
