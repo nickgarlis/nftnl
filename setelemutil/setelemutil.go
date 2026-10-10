@@ -1,4 +1,5 @@
 // Package setelemutil provides shorthand for building nftnl.SetElem values.
+// The range helpers are only for interval sets (nftnl.SetInterval).
 package setelemutil
 
 import (
@@ -40,10 +41,8 @@ func (a *Attrs) apply(e *nftnl.SetElem) error {
 	return nil
 }
 
-// Interval returns the elements for the inclusive range [first, last] of
-// big-endian keys: a start element, and an end element keyed by last+1.
-// A range ending at the top of the key space has no last+1, so it is the
-// start element alone, which the kernel matches to the end.
+// Interval returns the start and end elements for the inclusive range [first, last]
+// of big-endian keys. Only for interval sets (nftnl.SetInterval).
 func Interval(first, last []byte, attrs *Attrs) ([]nftnl.SetElem, error) {
 	if len(first) != len(last) {
 		return nil, fmt.Errorf("setelemutil: Interval: keys of different lengths (%d and %d)", len(first), len(last))
@@ -58,6 +57,7 @@ func Interval(first, last []byte, attrs *Attrs) ([]nftnl.SetElem, error) {
 	}
 
 	end := slices.Clone(last)
+	// A range ending at the top of the key space has no end element; the kernel matches it to the end.
 	if wrapped := incBytes(end); wrapped {
 		return []nftnl.SetElem{start}, nil
 	}
@@ -66,6 +66,7 @@ func Interval(first, last []byte, attrs *Attrs) ([]nftnl.SetElem, error) {
 }
 
 // IPPrefix returns the elements for the range p covers.
+// Only for interval sets (nftnl.SetInterval).
 func IPPrefix(p netip.Prefix, attrs *Attrs) ([]nftnl.SetElem, error) {
 	p = p.Masked()
 	first := p.Addr().Unmap().AsSlice()
@@ -77,6 +78,7 @@ func IPPrefix(p netip.Prefix, attrs *Attrs) ([]nftnl.SetElem, error) {
 }
 
 // IPRange returns the elements for the inclusive range [first, last].
+// Only for interval sets (nftnl.SetInterval).
 func IPRange(first, last netip.Addr, attrs *Attrs) ([]nftnl.SetElem, error) {
 	first, last = first.Unmap(), last.Unmap()
 	if first.Is4() != last.Is4() {
@@ -86,6 +88,7 @@ func IPRange(first, last netip.Addr, attrs *Attrs) ([]nftnl.SetElem, error) {
 }
 
 // PortRange returns the elements for the inclusive port range [first, last].
+// Only for interval sets (nftnl.SetInterval).
 func PortRange(first, last uint16, attrs *Attrs) ([]nftnl.SetElem, error) {
 	return Interval(
 		binary.BigEndian.AppendUint16(nil, first),
